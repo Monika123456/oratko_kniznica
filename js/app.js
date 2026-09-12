@@ -12,6 +12,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // Sem neskôr vložíte vaše kľúče z EmailJS.com
 const EMAILJS_SERVICE_ID = 'service_asu2c7y';
 const EMAILJS_TEMPLATE_ID = 'template_k6evr7k';
+const EMAILJS_PUBLIC_KEY = 'nZ22RG4hDzt5rj5d-';
 
 let currentActiveBorrows = [];
 
@@ -433,5 +434,14 @@ function escapeQuotes(str) {
 // ==========================================
 
 document.addEventListener('DOMContentLoaded', () => {
-  loadBooks();
+  // Inicializácia EmailJS pri štarte aplikácie
+    if (typeof emailjs !== 'undefined' && EMAILJS_PUBLIC_KEY !== 'user_xxx') {
+        emailjs.init(EMAILJS_PUBLIC_KEY);
+        console.log('EmailJS bol úspešne inicializovaný.');
+    } else {
+        console.warn('EmailJS nie je pripravený (chýba Public Key alebo CDN skript).');
+    }
+
+    // Tu pokračuje váš doterajší kód (napr. loadBooks(), načítanie výpožičiek...)
+    loadBooks();
 });

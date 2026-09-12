@@ -3,20 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Správa Knižnice</title>
-  <!-- Načítanie Supabase z CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <title>Oratkovská Knižnica</title>
+  
+  <!-- Načítanie Supabase z CDN (použité spoločné CDN) -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  
   <!-- Načítanie knižnice pre prácu s Excel súbormi (SheetJS) -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  
+  <!-- Načítanie EmailJS knižnice -->
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  
   <!-- Odkaz na externé CSS -->
   <link rel="stylesheet" href="css/style.css">
-  <!-- pripojenie emailu -->
-  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-  <script type="text/javascript">
-    (function(){
-        emailjs.init("nZ22RG4hDzt5rj5d-"); // Doplňte váš EmailJS Public Key
-    })();
-  </script>
+  
+  <!-- Odkaz na externý JavaScript (spustí sa po načítaní HTML) -->
+  <script src="js/app.js" defer></script>
 </head>
 <body>
 
@@ -155,9 +157,5 @@
     </div>
   </div>
 </div>
-
-<!-- Odkaz na externý JavaScript (na konci body) -->
-<script src="js/app.js"></script>
-
 </body>
 </html>
