@@ -1,4 +1,12 @@
 // ==========================================
+// SUPABASE KONFIGURÁCIA
+// ==========================================
+const SUPABASE_URL = 'https://hgocqneltjwtbudchwue.supabase.co'; // Vložte vašu Supabase URL
+const SUPABASE_ANON_KEY = 'sb_publishable_YfzIcERfJJ8jOaNxTPtztQ_mWIxP9w2';                   // Vložte váš Anon Key
+
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ==========================================
 // KONFIGURÁCIA EMAILJS A GLOBÁLNE PREMENNÉ
 // ==========================================
 // Sem neskôr vložíte vaše kľúče z EmailJS.com
