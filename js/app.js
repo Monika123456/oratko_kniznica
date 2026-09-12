@@ -472,6 +472,23 @@ function escapeQuotes(str) {
   return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
 }
 
+// Funkcia pre otvorenie prehľadu výpožičiek používateľa
+function openUserBorrowsModal() {
+    const modal = document.getElementById('userBorrowsModal');
+    if (modal) {
+        modal.style.display = 'flex';
+    } else {
+        alert('Modálne okno pre výpožičky nebolo v HTML nájdené.');
+    }
+}
+
+function closeUserBorrowsModal() {
+    const modal = document.getElementById('userBorrowsModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
 // ==========================================
 // 5. INICIALIZÁCIA PO NAČÍTANÍ STRÁNKY
 // ==========================================
