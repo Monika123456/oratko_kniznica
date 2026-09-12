@@ -20,58 +20,101 @@ let currentActiveBorrows = [];
 // 1. NAČÍTANIE A ZOBRAZENIE KNÍH
 // ==========================================
 
+// Globálne premenné pre uchovanie dát
+let allBooks = [];
+let activeBorrows = [];
+
+// Hlavné načítanie dát zo Supabase
 async function loadBooks() {
-  const container = document.getElementById('booksGrid');
-  if (!container) return;
+    try {
+        // 1. Načítanie aktívnych výpožičiek (ktoré nemajú vyplnený datum_vratenia)
+        const { data: borrowsData, error: borrowsError } = await supabaseClient
+            .from('vypozicky')
+            .select('*')
+            .is('datum_vratenia', null);
 
-  container.innerHTML = '<p style="text-align:center; grid-column: 1/-1;">Načítavam knihy...</p>';
+        if (borrowsError) throw borrowsError;
+        activeBorrows = borrowsData || [];
 
-  try {
-    const { data: books, error } = await supabaseClient
-      .from('knihy')
-      .select('*')
-      .order('nazov', { ascending: true });
+        // 2. Načítanie všetkých kníh
+        const { data: booksData, error: booksError } = await supabaseClient
+            .from('knihy')
+            .select('*')
+            .order('nazov', { ascending: true });
 
-    if (error) throw error;
+        if (booksError) throw booksError;
+        allBooks = booksData || [];
 
-    renderBooks(books || []);
-  } catch (err) {
-    console.error('Chyba pri načítaní kníh:', err);
-    container.innerHTML = `<p style="color:red; grid-column: 1/-1;">Chyba pri načítaní kníh: ${err.message}</p>`;
-  }
+        // 3. Vykreslenie kníh so správnou dostupnosťou
+        renderBooks(allBooks);
+
+    } catch (err) {
+        console.error('Chyba pri načítavaní dát zo Supabase:', err);
+        const container = document.getElementById('books-list') || document.getElementById('books-container');
+        if (container) {
+            container.innerHTML = `<p style="color:red;">Chyba pri načítaní kníh: ${err.message}</p>`;
+        }
+    }
 }
 
+// Vykreslenie zoznamu kníh v DOM
 function renderBooks(books) {
-  const container = document.getElementById('booksGrid');
-  if (!container) return;
+    const container = document.getElementById('books-list') || document.getElementById('books-container');
+    if (!container) return;
 
-  if (books.length === 0) {
-    container.innerHTML = '<p style="text-align:center; grid-column: 1/-1;">Žiadne knihy sa nenašli.</p>';
-    return;
-  }
+    container.innerHTML = '';
 
-  let html = '';
-  books.forEach(book => {
-    const isAvailable = book.dostupna !== false;
-    const badgeClass = isAvailable ? 'badge-available' : 'badge-unavailable';
-    const badgeText = isAvailable ? 'Dostupná' : 'Vypožičaná';
+    if (books.length === 0) {
+        container.innerHTML = '<p>V knižnici sa nenachádzajú žiadne knihy.</p>';
+        return;
+    }
 
-    html += `
-      <div class="book-card">
-        <div>
-          <div class="book-category">${book.kategoria || 'Všeobecné'}</div>
-          <div class="book-title">${book.nazov || 'Bez názvu'}</div>
-          <div class="book-author">${book.autor || 'Neznámy autor'}</div>
-        </div>
-        <div class="book-footer">
-          <span class="badge ${badgeClass}">${badgeText}</span>
-          ${isAvailable ? `<button class="btn-borrow" onclick="openBorrowModal(${book.id}, '${escapeQuotes(book.nazov)}')">Vypožičať</button>` : ''}
-        </div>
-      </div>
-    `;
-  });
+    books.forEach(book => {
+        // Zistenie, či je kniha aktuálne vypožičaná
+        const isBorrowed = activeBorrows.some(b => b.kniha_id === book.id);
+        const availabilityText = isBorrowed ? 'Vypožičaná' : 'Dostupná';
+        const availabilityClass = isBorrowed ? 'status-borrowed' : 'status-available';
 
-  container.innerHTML = html;
+        const card = document.createElement('div');
+        card.className = 'book-card';
+        card.innerHTML = `
+            <h3>${escapeHtml(book.nazov || 'Bez názvu')}</h3>
+            <p><strong>Autor:</strong> ${escapeHtml(book.autor || 'Neznámy')}</p>
+            <p><strong>Kategória:</strong> ${escapeHtml(book.kategoria || '-')}</p>
+            <p><strong>Stav:</strong> <span class="${availabilityClass}">${availabilityText}</span></p>
+            <div class="card-actions">
+                ${!isBorrowed ? `
+                    <button class="btn btn-primary" onclick="handleBorrowClick('${book.id}')">Vypožičať</button>
+                ` : `
+                    <button class="btn btn-secondary" onclick="handleReturnClick('${book.id}')">Vrátiť</button>
+                `}
+            </div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+// Obslužné funkcie pre tlačidlá na kartách kníh (PRIDANÉ PRE OPRAVU TLAČIDIEL)
+function handleBorrowClick(bookId) {
+    const book = allBooks.find(b => String(b.id) === String(bookId));
+    const title = book ? book.nazov : 'vybranú knihu';
+    openBorrowModal(bookId, title);
+}
+
+async function handleReturnClick(bookId) {
+    const borrow = activeBorrows.find(b => String(b.kniha_id) === String(bookId));
+    if (borrow) {
+        await adminReturnBook(borrow.id, bookId);
+    } else {
+        alert('Kniha je síce vypožičaná, ale nebol nájdený aktívny záznam.');
+    }
+}
+
+// Helper pre ochranu pred nebezpečným HTML
+function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, m => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    })[m]);
 }
 
 // ==========================================
@@ -434,14 +477,20 @@ function escapeQuotes(str) {
 // ==========================================
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Inicializácia EmailJS pri štarte aplikácie
-    if (typeof emailjs !== 'undefined' && EMAILJS_PUBLIC_KEY !== 'user_xxx') {
+    // Inicializácia EmailJS pri štarte aplikácie
+    if (typeof emailjs !== 'undefined' && EMAILJS_PUBLIC_KEY !== 'key') {
         emailjs.init(EMAILJS_PUBLIC_KEY);
         console.log('EmailJS bol úspešne inicializovaný.');
     } else {
         console.warn('EmailJS nie je pripravený (chýba Public Key alebo CDN skript).');
     }
 
-    // Tu pokračuje váš doterajší kód (napr. loadBooks(), načítanie výpožičiek...)
+    // Pripojenie formulára pre vypožičanie ak existuje v DOM
+    const borrowForm = document.getElementById('borrowForm');
+    if (borrowForm) {
+        borrowForm.addEventListener('submit', handleBorrowSubmit);
+    }
+
+    // Načítanie základných kníh z databázy
     loadBooks();
 });
