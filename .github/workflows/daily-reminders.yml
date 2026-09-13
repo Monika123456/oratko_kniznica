@@ -2,9 +2,8 @@ name: Denné automatické pripomienky
 
 on:
   schedule:
-    # Spustí sa každý deň o 06:00 UTC (čo je 08:00 nášho času)
-    - cron: '32 16 * * *'
-  workflow_dispatch: # Umožní spustiť skript aj manuálne tlačidlom v GitHube pre testovanie
+    - cron: '10 15 * * *'
+  workflow_dispatch:
 
 jobs:
   send-reminders:
@@ -17,10 +16,10 @@ jobs:
       - name: Nastavenie Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'  
 
       - name: Inštalácia závislostí
-        run: npm install @supabase/supabase-js node-fetch
+        run: npm install @supabase/supabase-js node-fetch ws
 
       - name: Spustenie pripomienkovača
         env:
