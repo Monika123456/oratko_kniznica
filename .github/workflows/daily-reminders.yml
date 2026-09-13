@@ -3,7 +3,7 @@ name: Denné automatické pripomienky
 on:
   schedule:
     # Spustí sa každý deň o 06:00 UTC (čo je 08:00 nášho času)
-    - cron: '22 16 * * *'
+    - cron: '32 16 * * *'
   workflow_dispatch: # Umožní spustiť skript aj manuálne tlačidlom v GitHube pre testovanie
 
 jobs:
@@ -29,4 +29,4 @@ jobs:
           EMAILJS_SERVICE_ID: ${{ secrets.EMAILJS_SERVICE_ID }}
           EMAILJS_TEMPLATE_ID: ${{ secrets.EMAILJS_TEMPLATE_ID }}
           EMAILJS_PUBLIC_KEY: ${{ secrets.EMAILJS_PUBLIC_KEY }}
-        run: node cron-reminders.js
+        run: node js/cron-reminders.js
