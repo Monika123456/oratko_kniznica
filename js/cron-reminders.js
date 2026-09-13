@@ -16,7 +16,7 @@ async function runAutomaticReminders() {
     const dnesStr = dnes.toISOString().split('T')[0];
 
     try {
-        // 1. Načítanie nastavenia intervalu (30 dní)
+        // 1. Načítanie nastavenia intervalu pre pripomienku
         const { data: setting, error: settingErr } = await supabase
             .from('nastavenia')
             .select('hodnota')
@@ -34,7 +34,13 @@ async function runAutomaticReminders() {
         // 2. Načítanie nevrátených výpožičiek
         const { data: loans, error: loansErr } = await supabase
             .from('vypozicky')
-            .select('*')
+            .select(`
+                *,
+                knihy (
+                    nazov,
+                    autor
+                )
+            `)
             .is('datum_vratenia', null);
 
         if (loansErr) {
@@ -49,7 +55,7 @@ async function runAutomaticReminders() {
 
             // Ak už dnes pripomienka odišla, preskočíme
             if (loan.posledna_pripomienka === dnesStr) {
-                console.log(`Preskakujem ${loan.email} (dnes už odoslané).`);
+                console.log(`Preskakujem ${loan.email} ${loan.kniha_id} (dnes už odoslané).`);
                 continue;
             }
 
@@ -80,8 +86,8 @@ async function runAutomaticReminders() {
                         template_params: {
                             email: loan.email,
                             meno: loan.meno || 'čitateľ',
-                            nazov_knihy: loan.nazov_knihy || loan.nazov || 'Kniha',
-                            autor: loan.autor || '',
+                            nazov_knihy: loan.knihy?.nazov || 'Kniha',  // <-- Zmena: loan.knihy.nazov
+                            autor: loan.knihy?.autor || '',             // <-- Zmena: loan.knihy.autor
                             datum_vypozicania: formattedDate,
                             pocet_dni: pocetDni
                         }
