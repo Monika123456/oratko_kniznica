@@ -6,6 +6,7 @@ const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
 const EMAILJS_SERVICE_ID = process.env.EMAILJS_SERVICE_ID;
 const EMAILJS_TEMPLATE_ID = process.env.EMAILJS_TEMPLATE_ID;
 const EMAILJS_PUBLIC_KEY = process.env.EMAILJS_PUBLIC_KEY;
+const EMAILJS_PRIVATE_KEY = process.env.EMAILJS_PRIVATE_KEY;
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
@@ -75,6 +76,7 @@ async function runAutomaticReminders() {
                         service_id: EMAILJS_SERVICE_ID,
                         template_id: EMAILJS_TEMPLATE_ID,
                         user_id: EMAILJS_PUBLIC_KEY,
+                        accessToken: EMAILJS_PRIVATE_KEY, // <-- Potrebné pre Strict Mode
                         template_params: {
                             email: loan.email,
                             meno: loan.meno || 'čitateľ',
