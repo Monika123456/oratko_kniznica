@@ -570,7 +570,7 @@ function renderAdminBorrows() {
                         <button 
                             type="button" 
                             style="padding: 6px 12px; font-size: 12px; background: #eab308; color: white; border: none; border-radius: 6px; cursor: pointer;" 
-                            onclick="sendManualReminder('${escapeQuotes(v.email)}', '${escapeQuotes(v.meno)}', '${escapeQuotes(nazov)}', '${escapeQuotes(autor)}', '${v.datum_vypozicania}')">
+                            onclick="sendManualReminder('${v.id}', '${escapeQuotes(v.email)}', '${escapeQuotes(v.meno)}', '${escapeQuotes(nazov)}', '${escapeQuotes(autor)}', '${v.datum_vypozicania}')">
                             ✉️ Pripomienka
                         </button>
                     </td>
@@ -651,7 +651,7 @@ function renderAdminBorrows() {
 // ==========================================
 // ODOSLANIE MANUÁLNEJ PRIPOMIENKY CEZ EMAILJS
 // ==========================================
-async function sendManualReminder(email, meno, nazovKnihy, autor, datumVypozicania) {
+async function sendManualReminder(vypozickaId, email, meno, nazovKnihy, autor, datumVypozicania) {
     if (!email) {
         alert('Čitateľ nemá zadaný e-mail!');
         return;
@@ -707,7 +707,27 @@ async function sendManualReminder(email, meno, nazovKnihy, autor, datumVypozican
 
         console.log(`datum: ${formattedDate}, pocet dni: ${pocetDni}`);
 
+        // 2. Aktualizácia atribútu posledna_pripomienka v Supabase
+        const dnesDna = new Date().toISOString().split('T')[0]; // Dátum vo formáte YYYY-MM-DD
+        
+        const { error: updateError } = await supabaseClient
+            .from('vypozicky')
+            .update({ posledna_pripomienka: dnesDna })
+            .eq('id', vypozickaId);
+
+        if (updateError) {
+            console.error('Chyba pri aktualizácii poslednej pripomienky v DB:', updateError);
+        } else {
+            console.log(`Dátum poslednej pripomienky bol úspešne aktualizovaný pre výpožičku ID ${vypozickaId}.`);
+        }
+
         alert(`Pripomienka bola úspešne odoslaná na: ${email} (požičané dňa ${formattedDate} - ${pocetDni} dní)`);
+
+        // Ak máte v aplikácii funkciu na znovunačítanie zoznamu výpožičiek, zavolajte ju tu (napr. loadLoans()):
+        if (typeof renderAdminLoans === 'function') {
+            renderAdminLoans();
+        }
+
     } catch (err) {
         console.error('Chyba pri odosielaní e-mailu:', err);
         alert('Nepodarilo sa odoslať e-mail. Skontrolujte nastavenia EmailJS.');
