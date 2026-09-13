@@ -69,8 +69,11 @@ async function loadBooks() {
 
         allBooks = booksData || [];
 
+        // Naplnenie kategórií do selektoru
+        populateCategories(allBooks);
+
         // 3. Vykreslenie kníh do katalógu
-        renderBooks(allBooks);
+        filterAndRenderBooks();
 
     } catch (err) {
         console.error('Kritická chyba v loadBooks:', err);
@@ -78,6 +81,39 @@ async function loadBooks() {
             container.innerHTML = `<p style="color: var(--danger-text); padding: 20px; text-align: center; grid-column: 1/-1;"><strong>Chyba:</strong> ${err.message}</p>`;
         }
     }
+}
+
+function populateCategories(books) {
+    const categorySelect = document.getElementById('categorySelect') || document.querySelector('.category-select');
+    if (!categorySelect) return;
+
+    const categories = Array.from(new Set(books.map(b => b.kategoria || 'Všeobecné'))).sort();
+    
+    categorySelect.innerHTML = '<option value="">Všetky kategórie</option>';
+    categories.forEach(cat => {
+        const option = document.createElement('option');
+        option.value = cat;
+        option.textContent = cat;
+        categorySelect.appendChild(option);
+    });
+}
+
+function filterAndRenderBooks() {
+    const searchInput = document.getElementById('searchInput') || document.querySelector('.search-box');
+    const categorySelect = document.getElementById('categorySelect') || document.querySelector('.category-select');
+
+    const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
+    const selectedCategory = categorySelect ? categorySelect.value : '';
+
+    const filtered = allBooks.filter(book => {
+        const matchesQuery = (book.nazov || '').toLowerCase().includes(query) || 
+                             (book.autor || '').toLowerCase().includes(query);
+        const matchesCategory = selectedCategory === '' || (book.kategoria || 'Všeobecné') === selectedCategory;
+
+        return matchesQuery && matchesCategory;
+    });
+
+    renderBooks(filtered);
 }
 
 function renderBooks(booksToRender) {
@@ -89,7 +125,7 @@ function renderBooks(booksToRender) {
     }
 
     if (!booksToRender || booksToRender.length === 0) {
-        container.innerHTML = '<p style="text-align: center; grid-column: 1/-1; color: var(--text-muted);">Zatiaľ neboli nájdené žiadne knihy.</p>';
+        container.innerHTML = '<p style="text-align: center; grid-column: 1/-1; color: var(--text-muted); padding: 20px;">Žiadne knihy neodpovedajú zadaným kritériám.</p>';
         return;
     }
 
@@ -349,7 +385,7 @@ async function returnBook(borrowId) {
 }
 
 // ==========================================
-// 4. ADMIN SEKCIA A PRIHLÁSENIE (CEZ DB "admini")
+// 4. ADMIN SEKCIA A PRIHLÁSENIE
 // ==========================================
 async function checkAdmin() {
     const emailInput = document.getElementById('adminEmail');
@@ -521,7 +557,7 @@ function renderAdminBorrows() {
             const { nazov, autor } = getBookInfo(v);
             const datum = new Date(v.datum_vypozicania).toLocaleString('sk-SK', {
                 day: '2-digit', month: '2-digit', year: 'numeric'
-            });
+            }).replaceAll(' ', '');
 
             html += `
                 <tr>
@@ -534,7 +570,7 @@ function renderAdminBorrows() {
                         <button 
                             type="button" 
                             style="padding: 6px 12px; font-size: 12px; background: #eab308; color: white; border: none; border-radius: 6px; cursor: pointer;" 
-                            onclick="sendManualReminder('${escapeQuotes(v.email)}', '${escapeQuotes(v.meno)}', '${escapeQuotes(nazov)}', '${escapeQuotes(autor)}', '${datum}')">
+                            onclick="sendManualReminder('${escapeQuotes(v.email)}', '${escapeQuotes(v.meno)}', '${escapeQuotes(nazov)}', '${escapeQuotes(autor)}', '${v.datum_vypozicania}')">
                             ✉️ Pripomienka
                         </button>
                     </td>
@@ -571,7 +607,6 @@ function renderAdminBorrows() {
 
         let topUsers = Object.values(userMap);
 
-        // Agregované zoradzovanie podľa počtu kníh (desc) a podľa najstaršej výpožičky (asc)
         if (filterValue === 'user-count-desc') {
             topUsers.sort((a, b) => b.count - a.count || a.oldestDate - b.oldestDate);
         } else if (filterValue === 'user-oldest-asc') {
@@ -613,6 +648,9 @@ function renderAdminBorrows() {
     }
 }
 
+// ==========================================
+// ODOSLANIE MANUÁLNEJ PRIPOMIENKY CEZ EMAILJS
+// ==========================================
 async function sendManualReminder(email, meno, nazovKnihy, autor, datumVypozicania) {
     if (!email) {
         alert('Čitateľ nemá zadaný e-mail!');
@@ -625,22 +663,264 @@ async function sendManualReminder(email, meno, nazovKnihy, autor, datumVypozican
 
     try {
         if (typeof emailjs === 'undefined') {
-            alert('EmailJS nie je načítaný! Skontrolujte skript v index.html');
+            alert('EmailJS nie je načítaný! Skontrolujte, či je v index.html pridaný <script> pre EmailJS.');
             return;
+        }
+
+        let pocetDni = 0;
+        let formattedDate = '';
+
+        if (datumVypozicania) {
+            const datumBorrow = new Date(datumVypozicania);
+
+            // Kontrola, či je dátum platný
+            if (!isNaN(datumBorrow.getTime())) {
+                const dnes = new Date();
+                
+                // Vynulovanie časov pre presný výpočet celých dní
+                dnes.setHours(0, 0, 0, 0);
+                datumBorrow.setHours(0, 0, 0, 0);
+
+                const rozdielCasu = dnes - datumBorrow;
+                pocetDni = Math.floor(rozdielCasu / (1000 * 60 * 60 * 24));
+                if (pocetDni < 0) pocetDni = 0;
+
+                // Vyformátovanie dátumu na slovenský tvar bez medzier (napr. 13.09.2026)
+                formattedDate = datumBorrow.toLocaleDateString('sk-SK', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                }).replaceAll(' ', '');
+            } else {
+                console.warn('Neplatný formát dátumu výpožičky:', datumVypozicania);
+            }
         }
 
         await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
             email: email,
             meno: meno || 'čitateľ',
-            nazov_knihy: nazovKnihy,
+            nazov_knihy: nazovKnihy || 'Kniha',
             autor: autor || '',
-            datum_vypozicania: datumVypozicania
+            datum_vypozicania: formattedDate, 
+            pocet_dni: pocetDni
         });
 
-        alert(`Pripomienka bola úspešne odoslaná na: ${email}`);
+        console.log(`datum: ${formattedDate}, pocet dni: ${pocetDni}`);
+
+        alert(`Pripomienka bola úspešne odoslaná na: ${email} (požičané dňa ${formattedDate} - ${pocetDni} dní)`);
     } catch (err) {
         console.error('Chyba pri odosielaní e-mailu:', err);
         alert('Nepodarilo sa odoslať e-mail. Skontrolujte nastavenia EmailJS.');
+    }
+}
+
+// ==========================================
+// IMPORT KNÍH Z EXCELU DO SUPABASE (PÁROVANIE: NÁZOV + AUTOR)
+// ==========================================
+async function importBooksFromExcel() {
+    const fileInput = document.getElementById('excelFileInput');
+    const progressDiv = document.getElementById('importProgress');
+
+    if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+        alert('Prosím, vyberte Excel súbor pre import.');
+        return;
+    }
+
+    const file = fileInput.files[0];
+
+    if (progressDiv) {
+        progressDiv.innerText = 'Spracovávam Excel súbor...';
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = async function(e) {
+        try {
+            const excelBuffer = new Uint8Array(e.target.result);
+            
+            if (typeof XLSX === 'undefined') {
+                alert('Knižnica XLSX nie je načítaná v index.html!');
+                if (progressDiv) progressDiv.innerText = '';
+                return;
+            }
+
+            const workbook = XLSX.read(excelBuffer, { type: 'array' });
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+            
+            const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+            if (!jsonData || jsonData.length === 0) {
+                alert('Vybraný súbor je prázdny.');
+                if (progressDiv) progressDiv.innerText = '';
+                return;
+            }
+
+            if (progressDiv) {
+                progressDiv.innerText = 'Načítavam existujúce knihy z databázy...';
+            }
+
+            // 1. Načítanie existujúcich kníh zo Supabase
+            const { data: existingBooks, error: fetchError } = await supabaseClient
+                .from('knihy')
+                .select('id, nazov, autor, kategoria, pocet_celkovo, pocet_dostupnych');
+
+            if (fetchError) {
+                console.error('Chyba pri načítaní existujúcich kníh:', fetchError);
+                alert('Chyba pri načítaní dát zo Supabase: ' + fetchError.message);
+                if (progressDiv) progressDiv.innerText = 'Import zlyhal.';
+                return;
+            }
+
+            // Mapa existujúcich kníh podľa dvojice "nazov|autor" (malými písmenami)
+            const existingMap = new Map();
+            (existingBooks || []).forEach(b => {
+                if (b.nazov) {
+                    const nazovClean = b.nazov.trim().toLowerCase();
+                    const autorClean = (b.autor || 'Neznámy autor').trim().toLowerCase();
+                    const compoundKey = `${nazovClean}|${autorClean}`;
+                    existingMap.set(compoundKey, b);
+                }
+            });
+
+            const toInsert = [];
+            let updatedCount = 0;
+            let skippedCount = 0;
+            let lastCategory = ''; // Dedenie kategórie z predošlého riadku
+
+            if (progressDiv) {
+                progressDiv.innerText = 'Porovnávam dáta z Excelu...';
+            }
+
+            // 2. Prechádzanie riadkov z Excelu
+            for (const row of jsonData) {
+                const rawNazov = (row['Názov knihy'] || row['Nazov knihy'] || '').toString().trim();
+                const rawAutor = (row['Autor'] || 'Neznámy autor').toString().trim();
+                let rawKategoria = (row['Kategória'] || row['Kategoria'] || '').toString().trim();
+                const rawPocet = parseInt(row['Počet kusov'] || row['Pocet kusov'] || 1, 10) || 1;
+
+                if (!rawNazov) continue; // Preskočiť prázdne riadky
+
+                // Dedenie kategórie ak je bunka prázdna
+                if (rawKategoria) {
+                    lastCategory = rawKategoria;
+                } else {
+                    rawKategoria = lastCategory;
+                }
+
+                // Zloženie unikátneho kľúča: nazov + autor
+                const compoundKey = `${rawNazov.toLowerCase()}|${rawAutor.toLowerCase()}`;
+                const existing = existingMap.get(compoundKey);
+
+                if (existing) {
+                    // Kniha s rovnakým NÁZVOM aj AUTOROM existuje -> kontrola Kategórie a Počtu kusov
+                    const sameKategoria = (existing.kategoria || '').trim() === rawKategoria;
+                    const samePocetCelkovo = parseInt(existing.pocet_celkovo, 10) === rawPocet;
+
+                    if (sameKategoria && samePocetCelkovo) {
+                        // Všetko je rovnaké -> NEROBIŤ NIČ
+                        skippedCount++;
+                    } else {
+                        // Zmenila sa kategória alebo počet kusov -> UPDATE
+                        const staryCelkovo = parseInt(existing.pocet_celkovo, 10) || 0;
+                        const staryDostupnych = parseInt(existing.pocet_dostupnych, 10) || 0;
+                        const vypocitane = staryCelkovo - staryDostupnych;
+                        
+                        let novyDostupnych = rawPocet - vypocitane;
+                        if (novyDostupnych < 0) novyDostupnych = 0;
+
+                        const { error: updateError } = await supabaseClient
+                            .from('knihy')
+                            .update({
+                                autor: rawAutor,
+                                kategoria: rawKategoria,
+                                pocet_celkovo: rawPocet,
+                                pocet_dostupnych: novyDostupnych
+                            })
+                            .eq('id', existing.id);
+
+                        if (updateError) {
+                            console.error(`Chyba pri aktualizácii knihy ID ${existing.id}:`, updateError);
+                        } else {
+                            updatedCount++;
+                        }
+                    }
+                } else {
+                    // Dvojica Názov + Autor v databáze neexistuje -> INSERT novej knihy
+                    toInsert.push({
+                        nazov: rawNazov,
+                        autor: rawAutor,
+                        kategoria: rawKategoria,
+                        pocet_celkovo: rawPocet,
+                        pocet_dostupnych: rawPocet
+                    });
+                }
+            }
+
+            // 3. Vloženie nových kníh do Supabase
+            let insertedCount = 0;
+            if (toInsert.length > 0) {
+                const { error: insertError } = await supabaseClient
+                    .from('knihy')
+                    .insert(toInsert);
+
+                if (insertError) {
+                    console.error('Chyba pri vkladaní nových kníh:', insertError);
+                    alert('Chyba pri pridávaní nových kníh: ' + insertError.message);
+                } else {
+                    insertedCount = toInsert.length;
+                }
+            }
+
+            const resultMsg = `Import dokončený!\n- Nové knihy: ${insertedCount}\n- Aktualizované: ${updatedCount}\n- Bez zmeny (preskočené): ${skippedCount}`;
+            
+            if (progressDiv) {
+                progressDiv.innerText = `✅ Nové: ${insertedCount} | Aktualizované: ${updatedCount} | Preskočené: ${skippedCount}`;
+            }
+
+            alert(resultMsg);
+            
+            fileInput.value = '';
+            if (typeof loadBooks === 'function') {
+                loadBooks();
+            }
+
+        } catch (err) {
+            console.error('Chyba spracovania:', err);
+            alert('Pri spracovaní súboru nastala chyba.');
+            if (progressDiv) progressDiv.innerText = 'Chyba spracovania.';
+        }
+    };
+
+    reader.readAsArrayBuffer(file);
+}
+
+// ==========================================
+// FILTROVANIE A VYHĽADÁVANIE KNÍH
+// ==========================================
+function filterBooks() {
+    const searchInput = document.getElementById('searchInput');
+    const categorySelect = document.getElementById('categoryFilter');
+    
+    const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
+    const selectedCategory = categorySelect ? categorySelect.value : 'all';
+
+    // Ak existuje pole allBooks (globálne pole načítaných kníh zo Supabase)
+    if (typeof allBooks !== 'undefined' && Array.isArray(allBooks)) {
+        const filtered = allBooks.filter(book => {
+            const matchesSearch = (book.nazov || '').toLowerCase().includes(query) || 
+                                  (book.autor || '').toLowerCase().includes(query);
+            const matchesCategory = (selectedCategory === 'all' || selectedCategory === '' || book.kategoria === selectedCategory);
+            
+            return matchesSearch && matchesCategory;
+        });
+
+        // Ak máte funkciu na vykreslenie kníh (napr. renderBooks), zavoláme ju s vyfiltrovaným zoznamom
+        if (typeof renderBooks === 'function') {
+            renderBooks(filtered);
+        } else if (typeof displayBooks === 'function') {
+            displayBooks(filtered);
+        }
     }
 }
 
@@ -657,6 +937,17 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) {
             console.error('Chyba pri inicializácii EmailJS:', e);
         }
+    }
+
+    // Poslucháče udalostí pre dynamické vyhľadávanie a filtrovanie kníh
+    const searchInput = document.getElementById('searchInput') || document.querySelector('.search-box');
+    const categorySelect = document.getElementById('categorySelect') || document.querySelector('.category-select');
+
+    if (searchInput) {
+        searchInput.addEventListener('input', filterAndRenderBooks);
+    }
+    if (categorySelect) {
+        categorySelect.addEventListener('change', filterAndRenderBooks);
     }
 
     loadBooks();

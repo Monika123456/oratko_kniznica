@@ -1,0 +1,32 @@
+name: Denné automatické pripomienky
+
+on:
+  schedule:
+    # Spustí sa každý deň o 06:00 UTC (čo je 08:00 nášho času)
+    - cron: '0 15 * * *'
+  workflow_dispatch: # Umožní spustiť skript aj manuálne tlačidlom v GitHube pre testovanie
+
+jobs:
+  send-reminders:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Stiahnutie kódu z repozitára
+        uses: actions/checkout@v3
+
+      - name: Nastavenie Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Inštalácia závislostí
+        run: npm install @supabase/supabase-js node-fetch
+
+      - name: Spustenie pripomienkovača
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          EMAILJS_SERVICE_ID: ${{ secrets.EMAILJS_SERVICE_ID }}
+          EMAILJS_TEMPLATE_ID: ${{ secrets.EMAILJS_TEMPLATE_ID }}
+          EMAILJS_PUBLIC_KEY: ${{ secrets.EMAILJS_PUBLIC_KEY }}
+        run: node cron-reminders.js

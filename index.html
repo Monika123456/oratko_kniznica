@@ -62,11 +62,8 @@
 
     <div id="importBox" class="import-box" style="display: none;">
       <h3 style="margin-bottom: 8px;">Import kníh z Excelu (.xlsx, .xls)</h3>
-      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">
-        Aplikácia automaticky doplní chýbajúce kategórie z predchádzajúcich riadkov a chýbajúce počty nastaví na 1.
-      </p>
       <input type="file" id="excelFileInput" accept=".xlsx, .xls" style="margin-bottom: 10px; width: 100%;">
-      <button onclick="processExcelImport()" style="background: #059669; width: 100%;">Spustiť import</button>
+      <button onclick="importBooksFromExcel()" style="background: #059669; width: 100%;">Spustiť import</button>
       <div id="importProgress" style="margin-top: 10px; font-size: 13px; font-weight: bold; color: var(--primary);"></div>
     </div>
   </div>
