@@ -3,7 +3,7 @@ name: Denné automatické pripomienky
 on:
   schedule:
     # Spustí sa každý deň o 06:00 UTC (čo je 08:00 nášho času)
-    - cron: '10 15 * * *'
+    - cron: '15 16 * * *'
   workflow_dispatch: # Umožní spustiť skript aj manuálne tlačidlom v GitHube pre testovanie
 
 jobs:
