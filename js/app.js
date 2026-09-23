@@ -200,6 +200,8 @@ async function submitBorrowForm(event) {
     if (event) event.preventDefault();
 
     const bookId = document.getElementById('borrowBookId')?.value;
+    const bookTitle = document.getElementById('borrowBookTitle')?.value;
+    const bookAuthor = document.getElementById('borrowBookAuthor')?.value;
     const nameInput = document.getElementById('borrowName')?.value.trim();
     const emailInput = document.getElementById('borrowEmail')?.value.trim().toLowerCase();
 
@@ -236,10 +238,10 @@ async function submitBorrowForm(event) {
 
         // odoslanie potvrdzujuceho mailu 
         sendBorrowConfirmation(
-            userEmail, 
-            userName, 
-            selectedBookTitle, // Názov knihy
-            selectedBookAuthor, // Autor knihy
+            emailInput, 
+            nameInput, 
+            bookTitle, // Názov knihy
+            bookAuthor, // Autor knihy
             new Date() // Dnešný dátum
         );
         
