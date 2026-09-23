@@ -1,108 +1,386 @@
 :root {
-      --primary: #2563eb;
-      --primary-hover: #1d4ed8;
-      --bg: #f8fafc;
-      --card-bg: #ffffff;
-      --text: #1e293b;
-      --text-muted: #64748b;
-      --border: #e2e8f0;
-      --success-bg: #dcfce7;
-      --success-text: #166534;
-      --danger-bg: #fee2e2;
-      --danger-text: #991b1b;
-    }
+    --primary: #2563eb;
+    --primary-hover: #1d4ed8;
+    --bg: #f8fafc;
+    --text-main: #0f172a;
+    --card-bg: #ffffff;
+    --text: #1e293b;
+    --text-muted: #64748b;
+    --border: #e2e8f0;
+    --success-bg: #dcfce7;
+    --success-text: #166534;
+    --danger-bg: #fee2e2;
+    --danger-text: #991b1b;
+    --box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    --input_select_box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    --search_cat_box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --book-card-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    --book-card-hover-box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    --modal-content-box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    --btn-return-hover-background: #047857;
+    --btn-return-background: #059669;
+    --btn-close-hover: #e2e8f0;
+    --btn-close-background: #f1f5f9;
+    --modal-overlay-background: rgba(15, 23, 42, 0.6);
+    --import-box-background: #eff6ff;
+    --import-box-border: #93c5fd;
+    --book-footer-border: #f1f5f9;
+    --btn-color: white;
+}
 
 /* Automatický tmavý režim pre zariadenia s zapnutým dark mode */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --primary: #3b82f6;
-    --primary-hover: #60a5fa;
-    --bg: #0f172a;           /* Tmavomodré/tmavosivé pozadie */
-    --card-bg: #1e293b;      /* Pozadie pre karty a modaly */
-    --text: #f8fafc;         /* Svetlý text */
-    --text-muted: #94a3b8;   /* Jemnejší svetlý text */
-    --border: #334155;       /* Tmavšie orámovanie */
-    --success-bg: #064e3b;
-    --success-text: #a7f3d0;
-    --danger-bg: #7f1d1d;
-    --danger-text: #fecaca;
-  }
+    :root {
+        --primary: #3b82f6;
+        --primary-hover: #60a5fa;
+        --bg: #0f172a;
+        --card-bg: #1e293b;
+        --text: #f8fafc;
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --success-bg: #064e3b;
+        --success-text: #a7f3d0;
+        --danger-bg: #7f1d1d;
+        --danger-text: #fecaca;
+        --box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+        --input_select_box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.4);
+        --search_cat_box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+        --book-card-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+        --book-card-hover-box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        --modal-content-box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
+        --btn-return-hover-background: #047857;
+        --btn-return-background: #059669;
+        --btn-close-hover: #94a3b8;
+        --btn-close-background: #f1f5f9;
+        --modal-overlay-background: rgba(0, 0, 0, 0.6);
+        --import-box-background: #0f172a;
+        --import-box-border: #93c5fd;
+        --book-footer-border: #0f172a;
+        --btn-color: black;
+    }
 }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); padding: 15px; /* Plynulá zmena farieb pri prepnutí svetlého/tmavého režimu */
-  transition: background-color 0.3s ease, color 0.3s ease;}
-    .container { max-width: 950px; margin: 0 auto; }
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
 
-    header { text-align: center; margin-bottom: 20px; }
-    h1 { font-size: 1.8rem; color: #0f172a; margin-bottom: 5px; }
+body {
+    font-family: system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 15px;
+    /* Plynulá zmena farieb pri prepnutí svetlého/tmavého režimu */
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
 
-    /* Horná lišta a Admin bar */
-    .user-bar, .admin-bar { background: var(--card-bg); padding: 15px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-    .top-actions { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
-    .admin-input-group { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
-    .admin-input-group input { flex: 1; min-width: 180px; }
+.container {
+    max-width: 950px;
+    margin: 0 auto;
+}
 
-    /* Form prvky */
-    input, select, button { padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; outline: none; background: white; }
-    input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
-    button { background: var(--primary); color: white; border: none; font-weight: 600; cursor: pointer; transition: background 0.2s; }
-    button:hover { background: var(--primary-hover); }
+header {
+    text-align: center;
+    margin-bottom: 20px;
+}
 
-    /* Filtre a Vyhľadávanie */
-    .filter-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
-    .search-box { flex: 2; min-width: 200px; font-size: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-    .category-select { flex: 1; min-width: 160px; font-size: 15px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+h1 {
+    font-size: 1.8rem;
+    color: var(--text-main);
+    margin-bottom: 5px;
+}
 
-    /* Karty kníh - GRID layout */
-    .books-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 15px; }
-    .book-card { background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border); padding: 16px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: transform 0.15s; }
-    .book-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+/* Horná lišta a Admin bar */
+.user-bar,
+.admin-bar {
+    background: var(--card-bg);
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    margin-bottom: 15px;
+    box-shadow: var(--box-shadow);
+}
 
-    .book-category { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; color: var(--primary); margin-bottom: 6px; }
-    .book-title { font-size: 1.1rem; font-weight: 700; color: #0f172a; margin-bottom: 4px; line-height: 1.3; }
-    .book-author { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 15px; }
+.top-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
 
-    .book-footer { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #f1f5f9; padding-top: 12px; margin-top: 10px; }
-    .badge { padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-    .badge-available { background: var(--success-bg); color: var(--success-text); }
-    .badge-unavailable { background: var(--danger-bg); color: var(--danger-text); }
+.admin-input-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
 
-    .btn-borrow { padding: 8px 14px; font-size: 13px; border-radius: 6px; }
+.admin-input-group input {
+    flex: 1;
+    min-width: 180px;
+}
 
-    .admin-only { display: none; }
-    .import-box { background: #eff6ff; border: 2px dashed #93c5fd; padding: 15px; border-radius: 12px; margin-bottom: 20px; }
+/* Form prvky */
+input,
+select,
+button {
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    background: var(--btn-color);
+}
 
-    /* Modal Okno */
-    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 15px; }
-    .modal-content { background: white; padding: 25px; border-radius: 16px; width: 100%; max-width: 850px; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
-    .modal-header h2 { font-size: 1.4rem; color: #0f172a; }
-    .btn-close { background: #f1f5f9; color: var(--text); border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
-    .btn-close:hover { background: #e2e8f0; }
+input:focus,
+select:focus {
+    border-color: var(--primary);
+    box-shadow: var(--input_select_box-shadow);
+}
 
-    /* Tabuľka výpožičiek */
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
-    th, td { text-align: left; padding: 12px; border-bottom: 1px solid var(--border); }
-    th { background: #f8fafc; font-weight: 600; color: var(--text-muted); }
-    .btn-return { background: #059669; color: white; padding: 6px 12px; border-radius: 6px; font-size: 12px; }
-    .btn-return:hover { background: #047857; }
+button {
+    background: var(--primary);
+    color: var(--btn-color);
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
 
-    .form-group { margin-bottom: 15px; }
-    .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; color: var(--text-muted); }
-    .form-group input { width: 100%; }
+button:hover {
+    background: var(--primary-hover);
+}
 
-    .admin-filter-bar {
-        display: flex;
-        margin-bottom: 15px;
-        background: #f8fafc;
-        padding: 12px;
-        border-radius: 10px;
-        border: 1px solid var(--border);
-        }
+/* Filtre a Vyhľadávanie */
+.filter-bar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
 
-    .admin-filter-bar select {
-        width: 100%;
-        font-size: 14px;
-        cursor: pointer;
-        }
+.search-box {
+    flex: 2;
+    min-width: 200px;
+    font-size: 15px;
+    box-shadow: var(--search_cat_box-shadow);
+}
+
+.category-select {
+    flex: 1;
+    min-width: 160px;
+    font-size: 15px;
+    cursor: pointer;
+    box-shadow: var(--search_cat_box-shadow);
+}
+
+/* Karty kníh - GRID layout */
+.books-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 15px;
+}
+
+.book-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: var(--book-card-box-shadow);
+    transition: transform 0.15s;
+}
+
+.book-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--book-card-hover-box-shadow);
+}
+
+.book-category {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 6px;
+}
+
+.book-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 4px;
+    line-height: 1.3;
+}
+
+.book-author {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 15px;
+}
+
+.book-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid var(--book-footer-border);
+    padding-top: 12px;
+    margin-top: 10px;
+}
+
+.badge {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.badge-available {
+    background: var(--success-bg);
+    color: var(--success-text);
+}
+
+.badge-unavailable {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+}
+
+.btn-borrow {
+    padding: 8px 14px;
+    font-size: 13px;
+    border-radius: 6px;
+}
+
+.admin-only {
+    display: none;
+}
+
+.import-box {
+    background: var(--import-box-background);
+    border: 2px dashed var(--import-box-border);
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+/* Modal Okno */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--modal-overlay-background);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 15px;
+}
+
+.modal-content {
+    background: white;
+    padding: 25px;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 850px;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: var(--modal-content-box-shadow);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 12px;
+}
+
+.modal-header h2 {
+    font-size: 1.4rem;
+    color: var(--text-main);
+}
+
+.btn-close {
+    background: var(--btn-close-background);
+    color: var(--text);
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.btn-close:hover {
+    background: var(--btn-close-hover);
+}
+
+/* Tabuľka výpožičiek */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+th,
+td {
+    text-align: left;
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+}
+
+th {
+    background: var(--bg);
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.btn-return {
+    background: var(--btn-return-background);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+}
+
+.btn-return:hover {
+    background: var(--btn-return-hover-background);
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: var(--text-muted);
+}
+
+.form-group input {
+    width: 100%;
+}
+
+.admin-filter-bar {
+    display: flex;
+    margin-bottom: 15px;
+    background: var(--bg);
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+}
+
+.admin-filter-bar select {
+    width: 100%;
+    font-size: 14px;
+    cursor: pointer;
+}
