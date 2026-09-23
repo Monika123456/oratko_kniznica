@@ -200,8 +200,6 @@ async function submitBorrowForm(event) {
     if (event) event.preventDefault();
 
     const bookId = document.getElementById('borrowBookId')?.value;
-    const bookTitle = document.getElementById('borrowBookTitle')?.value;
-    const bookAuthor = document.getElementById('borrowBookAuthor')?.value;
     const nameInput = document.getElementById('borrowName')?.value.trim();
     const emailInput = document.getElementById('borrowEmail')?.value.trim().toLowerCase();
 
@@ -211,6 +209,20 @@ async function submitBorrowForm(event) {
     }
 
     try {
+        // 1. NAČÍTANIE NÁZVU A AUTORA KNIHY PODĽA ID
+        const { data: bookData, error: bookError } = await supabaseClient
+            .from('knihy') // názov tvojej tabuľky s knihami
+            .select('nazov, autor') // stĺpce, ktoré potrebuješ
+            .eq('id', parseInt(bookId))
+            .single();
+
+        if (bookError || !bookData) {
+            console.error('Chyba pri načítaní detailov knihy:', bookError);
+            alert('Nenašli sa detaily o vybranej knihe.');
+            return;
+        }
+
+        // 2. ZÁPIS VÝPOŽIČKY DO TABUĽKY 'vypozicky'
         const { error } = await supabaseClient
             .from('vypozicky')
             .insert([
@@ -240,8 +252,8 @@ async function submitBorrowForm(event) {
         sendBorrowConfirmation(
             emailInput, 
             nameInput, 
-            bookTitle, // Názov knihy
-            bookAuthor, // Autor knihy
+            bookData.nazov, // Názov knihy
+            bookData.autor, // Autor knihy
             new Date() // Dnešný dátum
         );
         
