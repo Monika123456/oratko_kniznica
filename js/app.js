@@ -12,6 +12,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const EMAILJS_SERVICE_ID = 'service_asu2c7y';
 const EMAILJS_TEMPLATE_ID = 'template_k6evr7k';
 const EMAILJS_PUBLIC_KEY = 'nZ22RG4hDzt5rj5d-';
+const EMAILJS_CONFIRM_TEMPLATE_ID = 'template_0x5dqwj'; 
 
 let allBooks = [];
 let activeBorrows = [];
@@ -232,6 +233,16 @@ async function submitBorrowForm(event) {
         }
 
         alert('Kniha bola úspešne vypožičaná!');
+
+        // odoslanie potvrdzujuceho mailu 
+        sendBorrowConfirmation(
+            userEmail, 
+            userName, 
+            selectedBookTitle, // Názov knihy
+            selectedBookAuthor, // Autor knihy
+            new Date() // Dnešný dátum
+        );
+        
         closeBorrowModal();
         await loadBooks();
 
@@ -381,6 +392,38 @@ async function returnBook(borrowId) {
     } catch (err) {
         console.error('Kritická chyba pri vrátení knihy:', err);
         alert('Kritická chyba pri spracovaní vrátenia.');
+    }
+}
+
+async function sendBorrowConfirmation(email, meno, nazovKnihy, autor, datumVypozicania) {
+    if (!email) return; // Ak používateľ nemá e-mail, preskočíme
+
+    try {
+        let formattedDate = '';
+        if (datumVypozicania) {
+            const datumBorrow = new Date(datumVypozicania);
+            if (!isNaN(datumBorrow.getTime())) {
+                formattedDate = datumBorrow.toLocaleDateString('sk-SK', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                }).replaceAll(' ', '');
+            }
+        }
+
+        // Odoslanie potvrdenia cez EmailJS
+        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_CONFIRM_TEMPLATE_ID, {
+            email: email,
+            meno: meno || 'čitateľ',
+            nazov_knihy: nazovKnihy || 'Kniha',
+            autor: autor || '',
+            datum_vypozicania: formattedDate
+        });
+
+        console.log(`Potvrdzujúci e-mail bol úspešne odoslaný na ${email}`);
+    } catch (err) {
+        console.error('Chyba pri odosielaní potvrdzujúceho e-mailu:', err);
+        // Nezobrazujeme blocking alert, aby neprerušil hlavný proces uloženia výpožičky
     }
 }
 
