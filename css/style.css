@@ -17,8 +17,10 @@
     --book-card-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
     --book-card-hover-box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     --modal-content-box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    --modal-content-background: white;
     --btn-return-hover-background: #047857;
     --btn-return-background: #059669;
+    --btn-return-color: #e2e8f0;
     --btn-close-hover: #e2e8f0;
     --btn-close-background: #f1f5f9;
     --modal-overlay-background: rgba(15, 23, 42, 0.6);
@@ -49,8 +51,10 @@
         --book-card-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
         --book-card-hover-box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
         --modal-content-box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
+        --modal-content-background: #1e293b;
         --btn-return-hover-background: #047857;
         --btn-return-background: #059669;
+        --btn-return-color: #0f172a;
         --btn-close-hover: #94a3b8;
         --btn-close-background: #f1f5f9;
         --modal-overlay-background: rgba(0, 0, 0, 0.6);
@@ -284,7 +288,7 @@ button:hover {
 }
 
 .modal-content {
-    background: white;
+    background: var(--modal-content-background);
     padding: 25px;
     border-radius: 16px;
     width: 100%;
@@ -344,7 +348,7 @@ th {
 
 .btn-return {
     background: var(--btn-return-background);
-    color: white;
+    color: var(--btn-return-color);
     padding: 6px 12px;
     border-radius: 6px;
     font-size: 12px;
