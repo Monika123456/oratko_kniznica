@@ -35,7 +35,7 @@
         <span id="currentUserEmail" style="color: var(--primary); font-weight: 600;">Neprihlásený</span>
       </div>
       <div>
-        <button class="btn-open" onclick="openUserBorrowsModal()">📖 Moje výpožičky</button>
+        <button onclick="openUserBorrowsModal()">📖 Moje výpožičky</button>
       </div>
     </div>
   </div>
@@ -57,7 +57,7 @@
   <div id="adminControls" class="admin-only">
     <div style="margin-bottom: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
       <button class="btn-import" onclick="toggleImportBox()">📥 Importovať Excel</button>
-      <button class="btn-open" type="button" onclick="openAdminBorrowsModal()">📋 Prehľad výpožičiek (Admin)</button>
+      <button type="button" onclick="openAdminBorrowsModal()">📋 Prehľad výpožičiek (Admin)</button>
     </div>
 
     <div id="importBox" class="import-box" style="display: none;">
