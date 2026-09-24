@@ -24,7 +24,6 @@
     --btn-return-color: #e2e8f0;
     --btn-close-hover: #e2e8f0;
     --btn-close-background: #f1f5f9;
-    --btn-open-background: #4f46e5;
     --modal-overlay-background: rgba(15, 23, 42, 0.6);
     --user-auth-section-background: #eff6ff;
     --import-box-background: #eff6ff;
@@ -61,7 +60,6 @@
         --btn-return-color: #0f172a;
         --btn-close-hover: #94a3b8;
         --btn-close-background: #0f172a;
-        --btn-open-background: #4f46e5;
         --modal-overlay-background: rgba(0, 0, 0, 0.6);
         --user-auth-section-background: #0f172a;
         --import-box-background: #0f172a;
@@ -329,10 +327,6 @@ button:hover {
 
 .btn-close:hover {
     background: var(--btn-close-hover);
-}
-
-.btn-open {
-    background: var(--btn-open-background);
 }
 
 .user-auth-section {
