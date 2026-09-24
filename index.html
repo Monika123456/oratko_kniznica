@@ -4,19 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Oratkovská Knižnica Saleziáni Bardejov</title>
-  
+
   <!-- Načítanie Supabase z CDN (použité spoločné CDN) -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  
+
   <!-- Načítanie knižnice pre prácu s Excel súbormi (SheetJS) -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  
+
   <!-- Načítanie EmailJS knižnice -->
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-  
+
   <!-- Odkaz na externé CSS -->
   <link rel="stylesheet" href="css/style.css">
-  
+
   <!-- Odkaz na externý JavaScript (spustí sa po načítaní HTML) -->
   <script src="js/app.js" defer></script>
 </head>
@@ -31,11 +31,11 @@
   <div class="user-bar">
     <div class="top-actions">
       <div>
-        <strong>Prihlásený čitateľ:</strong> 
+        <strong>Prihlásený čitateľ:</strong>
         <span id="currentUserEmail" style="color: var(--primary); font-weight: 600;">Neprihlásený</span>
       </div>
       <div>
-        <button onclick="openUserBorrowsModal()" style="background: #0284c7;">📖 Moje výpožičky</button>
+        <button class="btn-open" onclick="openUserBorrowsModal()">📖 Moje výpožičky</button>
       </div>
     </div>
   </div>
@@ -56,14 +56,14 @@
   <!-- Tlačidlá pre Admina -->
   <div id="adminControls" class="admin-only">
     <div style="margin-bottom: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
-      <button onclick="toggleImportBox()" style="background: #059669;">📥 Importovať Excel</button>
-      <button type="button" onclick="openAdminBorrowsModal()" style="background: #4f46e5;">📋 Prehľad výpožičiek (Admin)</button>
+      <button class="btn-import" onclick="toggleImportBox()">📥 Importovať Excel</button>
+      <button class="btn-open" type="button" onclick="openAdminBorrowsModal()">📋 Prehľad výpožičiek (Admin)</button>
     </div>
 
     <div id="importBox" class="import-box" style="display: none;">
       <h3 style="margin-bottom: 8px;">Import kníh z Excelu (.xlsx, .xls)</h3>
       <input type="file" id="excelFileInput" accept=".xlsx, .xls" style="margin-bottom: 10px; width: 100%;">
-      <button onclick="importBooksFromExcel()" style="background: #059669; width: 100%;">Spustiť import</button>
+      <button class="btn-import" onclick="importBooksFromExcel()" style="width: 100%;">Spustiť import</button>
       <div id="importProgress" style="margin-top: 10px; font-size: 13px; font-weight: bold; color: var(--primary);"></div>
     </div>
   </div>
@@ -110,10 +110,10 @@
   <div class="modal-content">
     <div class="modal-header">
       <h2>📖 Moje výpožičky</h2>
-      <button class="btn-close" onclick="closeUserBorrowsModal()">✕ Zavrieť</button>
+      <button class="btn-close" onclick="closeUserBorrowsModal()">✕</button>
     </div>
-    <div id="userAuthSection" style="margin-bottom: 20px; background: #f8fafc; padding: 15px; border-radius: 10px;">
-      <label for="userModalEmail" style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px;">Zadajte e-mail pre načítanie vašich kníh:</label>
+    <div id="userAuthSection" class="user-auth-section">
+      <label for="userModalEmail">Zadajte e-mail pre načítanie vašich kníh:</label>
       <div style="display: flex; gap: 8px;">
         <input type="email" id="userModalEmail" placeholder="jan.novak@example.com" style="flex: 1;">
         <button onclick="loadUserBorrows()">Načítať</button>
@@ -130,7 +130,7 @@
   <div class="modal-content">
     <div class="modal-header">
       <h2>📋 Prehľad výpožičiek (Admin)</h2>
-      <button class="btn-close" onclick="closeAdminBorrowsModal()">✕ Zavrieť</button>
+      <button class="btn-close" onclick="closeAdminBorrowsModal()">✕</button>
     </div>
 
     <!-- Filtre pre Admina -->
