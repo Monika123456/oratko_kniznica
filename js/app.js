@@ -260,7 +260,7 @@ function renderBooks(booksToRender) {
             <div>
                 <div class="book-category">${escapeHtml(book.kategoria || 'Všeobecné')}</div>
                 <div class="book-title">${escapeHtml(book.nazov)}</div>
-                <div class="book-author">Autor: ${escapeHtml(book.autor || 'Neznámy autor')}</div>
+                <div class="book-author">${escapeHtml(book.autor || 'Neznámy autor')}</div>
             </div>
 
             <div class="book-footer">
