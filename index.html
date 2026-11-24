@@ -22,25 +22,21 @@
     <h1>📚 Oratkovská knižnica Saleziáni Bardejov</h1>
   </header>
 
-  <!-- Užívateľská lišta -->
-  <div class="user-bar">
-    <div class="top-actions">
-      <div>
-        <strong>Prihlásený účet:</strong>
-        <span id="currentUserEmail" style="color: var(--primary); font-weight: 600;">Neprihlásený</span>
+  <div class="account-bar">
+    <div class="account-toolbar">
+      <div class="account-identity">
+        <div class="account-email">
+          <strong>Účet:</strong>
+          <span id="currentUserEmail">Neprihlásený</span>
+        </div>
+        <span id="adminStatus" class="account-role" hidden></span>
       </div>
-      <div>
+      <div class="account-actions">
         <button type="button" data-action="open-user-borrows">📖 Moje výpožičky</button>
+        <button type="button" id="signOutButton" data-action="sign-out" hidden>Odhlásiť sa</button>
       </div>
     </div>
-  </div>
 
-  <!-- Prihlasovanie čitateľov aj administrátora cez Supabase Auth -->
-  <div class="admin-bar">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-      <strong>Účet</strong>
-      <span id="adminStatus" style="font-size: 13px; font-weight: 600; color: var(--text-muted);">Neprihlásený</span>
-    </div>
     <form id="authForm" class="auth-form">
       <input type="email" id="authEmail" autocomplete="email" required placeholder="Váš e-mail">
       <input type="password" id="authPassword" autocomplete="current-password" required minlength="8" placeholder="Heslo (aspoň 8 znakov)">
@@ -53,10 +49,6 @@
       <input type="password" id="confirmNewPassword" autocomplete="new-password" required minlength="8" placeholder="Zopakujte nové heslo">
       <button type="submit">Nastaviť nové heslo</button>
     </form>
-    <div id="signedInPanel" class="signed-in-panel" hidden>
-      <span>Ste prihlásený/-á. Vaša relácia zostane uložená v tomto prehliadači.</span>
-      <button type="button" data-action="sign-out">Odhlásiť sa</button>
-    </div>
     <p id="authMessage" class="auth-message" aria-live="polite"></p>
   </div>
 
@@ -173,6 +165,18 @@
 
     <div id="adminBorrowsList">
       <p style="text-align: center; color: var(--text-muted);">Načítavam výpožičky...</p>
+    </div>
+  </div>
+</div>
+
+<div id="feedbackModal" class="modal-overlay" style="display: none;">
+  <div id="feedbackDialog" class="modal-content feedback-modal-content" role="dialog" aria-modal="true" aria-labelledby="feedbackTitle" aria-describedby="feedbackMessage" tabindex="-1">
+    <span id="feedbackIcon" class="feedback-icon" aria-hidden="true"></span>
+    <h2 id="feedbackTitle"></h2>
+    <p id="feedbackMessage" role="status" aria-live="polite"></p>
+    <div class="feedback-actions">
+      <button type="button" id="feedbackConfirmButton" data-action="confirm-feedback" hidden></button>
+      <button type="button" id="feedbackCloseButton" data-action="close-feedback">Zavrieť</button>
     </div>
   </div>
 </div>
