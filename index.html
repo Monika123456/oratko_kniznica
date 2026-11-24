@@ -37,19 +37,18 @@
       </div>
     </div>
 
-    <form id="authForm" class="auth-form">
+    <form id="authForm" class="auth-form" novalidate>
       <input type="email" id="authEmail" autocomplete="email" required placeholder="Váš e-mail">
       <input type="password" id="authPassword" autocomplete="current-password" required minlength="8" placeholder="Heslo (aspoň 8 znakov)">
       <button type="submit">Prihlásiť sa</button>
       <button type="button" data-action="sign-up">Vytvoriť účet</button>
       <button type="button" class="btn-secondary" data-action="request-password-reset">Zabudnuté heslo</button>
     </form>
-    <form id="resetPasswordForm" class="auth-form" hidden>
+    <form id="resetPasswordForm" class="auth-form" novalidate hidden>
       <input type="password" id="newPassword" autocomplete="new-password" required minlength="8" placeholder="Nové heslo">
       <input type="password" id="confirmNewPassword" autocomplete="new-password" required minlength="8" placeholder="Zopakujte nové heslo">
       <button type="submit">Nastaviť nové heslo</button>
     </form>
-    <p id="authMessage" class="auth-message" aria-live="polite"></p>
   </div>
 
   <!-- Tlačidlá pre Admina -->
@@ -112,7 +111,7 @@
       <button type="button" class="btn-close" data-action="close-borrow">✕</button>
     </div>
     <div id="borrowModalBookTitle" style="font-weight: 700; margin-bottom: 15px; color: var(--primary);"></div>
-    <form id="borrowForm">
+    <form id="borrowForm" novalidate>
       <input type="hidden" id="borrowBookId">
       <div class="form-group">
         <label for="borrowName">Vaše meno a priezvisko:</label>
