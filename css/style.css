@@ -203,24 +203,6 @@ h1 {
     color: var(--text);
 }
 
-.auth-message {
-    margin-top: 8px;
-    color: var(--text-muted);
-    font-size: 13px;
-}
-
-.auth-message:empty {
-    display: none;
-}
-
-.auth-message[data-type="error"] {
-    color: var(--danger-text);
-}
-
-.auth-message[data-type="success"] {
-    color: var(--success-text);
-}
-
 @media (max-width: 520px) {
     .account-toolbar {
         align-items: flex-start;
