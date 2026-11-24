@@ -29,6 +29,8 @@
     --success-text: #166534;
     --danger-bg: #fee2e2;
     --danger-text: #991b1b;
+    --warning-bg: #fef3c7;
+    --warning-text: #92400e;
     --box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     --input_select_box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
     --search_cat_box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
@@ -70,6 +72,8 @@
         --success-text: #a7f3d0;
         --danger-bg: #7f1d1d;
         --danger-text: #fecaca;
+        --warning-bg: #78350f;
+        --warning-text: #fde68a;
         --box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
         --input_select_box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.4);
         --search_cat_box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
@@ -122,23 +126,62 @@ h1 {
     margin-bottom: 5px;
 }
 
-/* Horná lišta a Admin bar */
-.user-bar,
-.admin-bar {
+/* Kompaktný panel účtu */
+.account-bar {
     background: var(--card-bg);
-    padding: 15px;
+    padding: 12px;
     border-radius: 12px;
     border: 1px solid var(--border);
     margin-bottom: 15px;
     box-shadow: var(--box-shadow);
 }
 
-.top-actions {
+.account-toolbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 12px;
+}
+
+.account-identity {
+    min-width: 0;
+}
+
+.account-email {
+    display: flex;
+    align-items: baseline;
     flex-wrap: wrap;
-    gap: 10px;
+    column-gap: 5px;
+    overflow-wrap: anywhere;
+}
+
+#currentUserEmail {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.account-role {
+    display: inline-block;
+    margin-top: 2px;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.account-role[hidden],
+#signOutButton[hidden] {
+    display: none;
+}
+
+.account-actions {
+    display: flex;
+    flex-shrink: 0;
+    gap: 8px;
+}
+
+.account-actions button {
+    padding: 8px 10px;
+    white-space: nowrap;
 }
 
 .admin-input-group {
@@ -153,16 +196,14 @@ h1 {
     min-width: 180px;
 }
 
-.auth-form,
-.signed-in-panel {
+.auth-form {
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
     margin-top: 10px;
 }
 
-.auth-form[hidden],
-.signed-in-panel[hidden] {
+.auth-form[hidden] {
     display: none;
 }
 
@@ -177,10 +218,13 @@ h1 {
 }
 
 .auth-message {
-    min-height: 1.25em;
     margin-top: 8px;
     color: var(--text-muted);
     font-size: 13px;
+}
+
+.auth-message:empty {
+    display: none;
 }
 
 .auth-message[data-type="error"] {
@@ -189,6 +233,22 @@ h1 {
 
 .auth-message[data-type="success"] {
     color: var(--success-text);
+}
+
+@media (max-width: 520px) {
+    .account-toolbar {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .account-actions {
+        width: 100%;
+    }
+
+    .account-actions button {
+        flex: 1;
+    }
 }
 
 /* Form prvky */
@@ -504,6 +564,98 @@ button:hover {
     box-shadow: var(--modal-content-box-shadow);
 }
 
+.feedback-modal-content {
+    max-width: 430px;
+    text-align: center;
+}
+
+.feedback-icon {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 14px;
+    border-radius: 50%;
+    font-size: 26px;
+    font-weight: 700;
+}
+
+.feedback-modal--success .feedback-icon {
+    background: var(--success-bg);
+    color: var(--success-text);
+}
+
+.feedback-modal--warning .feedback-icon {
+    background: var(--warning-bg);
+    color: var(--warning-text);
+}
+
+.feedback-modal--error .feedback-icon {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+}
+
+.feedback-modal--info .feedback-icon,
+.feedback-modal--confirm .feedback-icon {
+    background: var(--user-auth-section-background);
+    color: var(--primary);
+}
+
+.feedback-modal--loading .feedback-icon {
+    border: 4px solid var(--border);
+    border-top-color: var(--primary);
+    animation: feedback-spin 0.8s linear infinite;
+}
+
+.feedback-modal-content h2 {
+    color: var(--text-main);
+    font-size: 1.3rem;
+    margin-bottom: 8px;
+}
+
+.feedback-modal-content p {
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.feedback-actions {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.feedback-actions button {
+    min-width: 120px;
+}
+
+#feedbackCloseButton {
+    background: var(--btn-close-background);
+    color: var(--text);
+}
+
+#feedbackCloseButton:hover {
+    background: var(--btn-close-hover);
+}
+
+#feedbackConfirmButton[hidden],
+#feedbackCloseButton[hidden] {
+    display: none;
+}
+
+@keyframes feedback-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .feedback-modal--loading .feedback-icon {
+        animation: none;
+    }
+}
+
 .modal-header {
     display: flex;
     justify-content: space-between;
@@ -618,34 +770,30 @@ th {
 }
 </style>
 
-
+  
 </head>
 <body>
 
 <div class="container">
   <header>
-    <h1>📚 Oratkovská Knižnica Saleziáni Bardejov</h1>
+    <h1>📚 Oratkovská knižnica Saleziáni Bardejov</h1>
   </header>
 
-  <!-- Užívateľská lišta -->
-  <div class="user-bar">
-    <div class="top-actions">
-      <div>
-        <strong>Prihlásený účet:</strong>
-        <span id="currentUserEmail" style="color: var(--primary); font-weight: 600;">Neprihlásený</span>
+  <div class="account-bar">
+    <div class="account-toolbar">
+      <div class="account-identity">
+        <div class="account-email">
+          <strong>Účet:</strong>
+          <span id="currentUserEmail">Neprihlásený</span>
+        </div>
+        <span id="adminStatus" class="account-role" hidden></span>
       </div>
-      <div>
+      <div class="account-actions">
         <button type="button" data-action="open-user-borrows">📖 Moje výpožičky</button>
+        <button type="button" id="signOutButton" data-action="sign-out" hidden>Odhlásiť sa</button>
       </div>
     </div>
-  </div>
 
-  <!-- Prihlasovanie čitateľov aj administrátora cez Supabase Auth -->
-  <div class="admin-bar">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-      <strong>Účet</strong>
-      <span id="adminStatus" style="font-size: 13px; font-weight: 600; color: var(--text-muted);">Neprihlásený</span>
-    </div>
     <form id="authForm" class="auth-form">
       <input type="email" id="authEmail" autocomplete="email" required placeholder="Váš e-mail">
       <input type="password" id="authPassword" autocomplete="current-password" required minlength="8" placeholder="Heslo (aspoň 8 znakov)">
@@ -658,10 +806,6 @@ th {
       <input type="password" id="confirmNewPassword" autocomplete="new-password" required minlength="8" placeholder="Zopakujte nové heslo">
       <button type="submit">Nastaviť nové heslo</button>
     </form>
-    <div id="signedInPanel" class="signed-in-panel" hidden>
-      <span>Ste prihlásený/-á. Vaša relácia zostane uložená v tomto prehliadači.</span>
-      <button type="button" data-action="sign-out">Odhlásiť sa</button>
-    </div>
     <p id="authMessage" class="auth-message" aria-live="polite"></p>
   </div>
 
@@ -778,6 +922,18 @@ th {
 
     <div id="adminBorrowsList">
       <p style="text-align: center; color: var(--text-muted);">Načítavam výpožičky...</p>
+    </div>
+  </div>
+</div>
+
+<div id="feedbackModal" class="modal-overlay" style="display: none;">
+  <div id="feedbackDialog" class="modal-content feedback-modal-content" role="dialog" aria-modal="true" aria-labelledby="feedbackTitle" aria-describedby="feedbackMessage" tabindex="-1">
+    <span id="feedbackIcon" class="feedback-icon" aria-hidden="true"></span>
+    <h2 id="feedbackTitle"></h2>
+    <p id="feedbackMessage" role="status" aria-live="polite"></p>
+    <div class="feedback-actions">
+      <button type="button" id="feedbackConfirmButton" data-action="confirm-feedback" hidden></button>
+      <button type="button" id="feedbackCloseButton" data-action="close-feedback">Zavrieť</button>
     </div>
   </div>
 </div>
@@ -992,6 +1148,11 @@ let isAdmin = false;
 let currentUser = null;
 let passwordRecoveryPending = false;
 let pendingBookImport = null;
+let feedbackModalBusy = false;
+let feedbackConfirmAction = null;
+let feedbackReturnFocus = null;
+let borrowSubmissionInProgress = false;
+let returnSubmissionInProgress = false;
 
 // ==========================================
 // 1. NAČÍTANIE A ZOBRAZENIE KNÍH
@@ -1274,8 +1435,71 @@ function closeBorrowModal() {
     if (form) form.reset();
 }
 
+function showFeedbackModal({ title, message, type = 'info', busy = false, confirmLabel, onConfirm }) {
+    const modal = document.getElementById('feedbackModal');
+    const dialog = document.getElementById('feedbackDialog');
+    const icon = document.getElementById('feedbackIcon');
+    const titleElement = document.getElementById('feedbackTitle');
+    const messageElement = document.getElementById('feedbackMessage');
+    const confirmButton = document.getElementById('feedbackConfirmButton');
+    const closeButton = document.getElementById('feedbackCloseButton');
+    if (!modal || !dialog || !icon || !titleElement || !messageElement || !confirmButton || !closeButton) {
+        console.error('Modálne okno upozornenia nebolo v HTML nájdené.');
+        return;
+    }
+
+    if (modal.style.display !== 'flex') feedbackReturnFocus = document.activeElement;
+
+    const icons = {
+        success: '✓',
+        warning: '!',
+        error: '×',
+        info: 'i',
+        confirm: '?',
+        loading: ''
+    };
+
+    dialog.className = `modal-content feedback-modal-content feedback-modal--${type}`;
+    dialog.setAttribute('aria-busy', String(busy));
+    icon.textContent = icons[type] || icons.info;
+    titleElement.textContent = title;
+    messageElement.textContent = message;
+    feedbackModalBusy = busy;
+    feedbackConfirmAction = onConfirm || null;
+
+    confirmButton.textContent = confirmLabel || '';
+    confirmButton.hidden = !confirmLabel || busy;
+    closeButton.hidden = busy;
+    modal.style.display = 'flex';
+
+    (busy ? dialog : confirmLabel ? confirmButton : closeButton).focus();
+}
+
+function closeFeedbackModal() {
+    if (feedbackModalBusy) return;
+
+    const modal = document.getElementById('feedbackModal');
+    if (modal) modal.style.display = 'none';
+    feedbackConfirmAction = null;
+
+    const returnFocus = feedbackReturnFocus;
+    feedbackReturnFocus = null;
+    if (returnFocus instanceof HTMLElement && returnFocus.isConnected && returnFocus.getClientRects().length > 0) {
+        returnFocus.focus();
+    }
+}
+
+function confirmFeedbackModal() {
+    if (feedbackModalBusy || !feedbackConfirmAction) return;
+
+    const action = feedbackConfirmAction;
+    feedbackConfirmAction = null;
+    action();
+}
+
 async function submitBorrowForm(event) {
     if (event) event.preventDefault();
+    if (borrowSubmissionInProgress) return;
 
     const bookId = document.getElementById('borrowBookId')?.value;
     const nameInput = document.getElementById('borrowName')?.value.trim();
@@ -1287,15 +1511,33 @@ async function submitBorrowForm(event) {
     }
 
     if (!bookId || !nameInput) {
-        alert('Zadajte svoje meno a priezvisko.');
+        showFeedbackModal({
+            title: 'Skontrolujte údaje',
+            message: 'Zadajte svoje meno a priezvisko.',
+            type: 'error'
+        });
         return;
     }
 
     const book = allBooks.find(item => String(item.id) === String(bookId));
     if (!book) {
-        alert('Vybraná kniha sa už nenašla. Obnovte katalóg a skúste to znova.');
+        showFeedbackModal({
+            title: 'Kniha sa nenašla',
+            message: 'Obnovte katalóg a skúste to znova.',
+            type: 'error'
+        });
         return;
     }
+
+    borrowSubmissionInProgress = true;
+    const submitButton = document.querySelector('#borrowForm button[type="submit"]');
+    if (submitButton) submitButton.disabled = true;
+    showFeedbackModal({
+        title: 'Spracúvam výpožičku',
+        message: 'Čakajte, prosím. Výpožičku teraz potvrdzujeme.',
+        type: 'loading',
+        busy: true
+    });
 
     try {
         const { error } = await supabaseClient.rpc('create_borrow', {
@@ -1307,10 +1549,15 @@ async function submitBorrowForm(event) {
             throw error;
         }
 
+        showFeedbackModal({
+            title: 'Výpožička je zaevidovaná',
+            message: 'Ešte odosielame potvrdenie na váš e-mail.',
+            type: 'loading',
+            busy: true
+        });
+
         let confirmationSent = false;
-        if (typeof emailjs === 'undefined') {
-            console.error('EmailJS nie je načítaný; výpožička bola uložená, potvrdenie sa neodoslalo.');
-        } else {
+        try {
             confirmationSent = await sendBorrowConfirmation(
                 currentUser.email,
                 nameInput,
@@ -1318,19 +1565,32 @@ async function submitBorrowForm(event) {
                 book.autor,
                 new Date()
             );
+        } catch (emailError) {
+            console.error('Výpožička bola uložená, ale potvrdenie sa nepodarilo odoslať:', emailError);
         }
 
-        alert(confirmationSent
-            ? 'Kniha bola úspešne vypožičaná a potvrdenie bolo odoslané e-mailom.'
-            : 'Kniha bola úspešne vypožičaná, ale potvrdzujúci e-mail sa nepodarilo odoslať.');
         closeBorrowModal();
+        showFeedbackModal({
+            title: 'Výpožička potvrdená',
+            message: confirmationSent
+                ? `Kniha „${book.nazov}“ je vypožičaná. Potvrdenie sme odoslali na ${currentUser.email}.`
+                : `Kniha „${book.nazov}“ je vypožičaná, ale potvrdzujúci e-mail sa nepodarilo odoslať.`,
+            type: confirmationSent ? 'success' : 'warning'
+        });
         await loadBooks();
         if (document.getElementById('userBorrowsModal')?.style.display === 'flex') {
             await loadUserBorrows();
         }
     } catch (err) {
         console.error('Chyba pri vytváraní výpožičky:', err);
-        alert(`Výpožičku sa nepodarilo vytvoriť: ${err.message || 'Neznáma chyba'}`);
+        showFeedbackModal({
+            title: 'Výpožičku sa nepodarilo vytvoriť',
+            message: err.message || 'Skúste to, prosím, znova.',
+            type: 'error'
+        });
+    } finally {
+        borrowSubmissionInProgress = false;
+        if (submitButton) submitButton.disabled = false;
     }
 }
 
@@ -1416,7 +1676,7 @@ async function loadUserBorrows() {
                     <td>${escapeHtml(knihaAutor)}</td>
                     <td>${datum}</td>
                     <td style="text-align: right;">
-                        <button class="btn-return" data-action="return-book" data-borrow-id="${item.id}">Vrátiť</button>
+                        <button class="btn-return" data-action="return-book" data-borrow-id="${item.id}" data-book-title="${escapeHtml(knihaNazov)}">Vrátiť</button>
                     </td>
                 </tr>
             `;
@@ -1431,8 +1691,26 @@ async function loadUserBorrows() {
     }
 }
 
-async function returnBook(borrowId) {
-    if (!confirm('Naozaj chcete vrátiť túto knihu?')) return;
+function returnBook(borrowId, bookTitle) {
+    showFeedbackModal({
+        title: bookTitle ? `Vrátiť knihu „${bookTitle}“?` : 'Vrátiť knihu?',
+        message: 'Potvrďte, že ste knihu odovzdali späť do knižnice.',
+        type: 'confirm',
+        confirmLabel: 'Potvrdiť vrátenie',
+        onConfirm: () => processBookReturn(borrowId, bookTitle)
+    });
+}
+
+async function processBookReturn(borrowId, bookTitle) {
+    if (returnSubmissionInProgress) return;
+
+    returnSubmissionInProgress = true;
+    showFeedbackModal({
+        title: 'Spracúvam vrátenie',
+        message: 'Čakajte, prosím. Vrátenie knihy teraz zaznamenávame.',
+        type: 'loading',
+        busy: true
+    });
 
     try {
         const { error } = await supabaseClient.rpc('return_borrow', {
@@ -1442,6 +1720,13 @@ async function returnBook(borrowId) {
         if (error) {
             throw error;
         }
+
+        showFeedbackModal({
+            title: bookTitle ? `Vrátenie knihy „${bookTitle}“ je zaevidované` : 'Vrátenie je zaevidované',
+            message: 'Ešte odosielame potvrdenie na váš e-mail.',
+            type: 'loading',
+            busy: true
+        });
 
         let confirmationSent = false;
         try {
@@ -1471,9 +1756,13 @@ async function returnBook(borrowId) {
             console.error('Kniha bola vrátená, ale údaje pre potvrdenie sa nepodarilo načítať:', emailError);
         }
 
-        alert(confirmationSent
-            ? 'Kniha bola úspešne vrátená a potvrdenie bolo odoslané e-mailom.'
-            : 'Kniha bola úspešne vrátená, ale potvrdzujúci e-mail sa nepodarilo odoslať.');
+        showFeedbackModal({
+            title: bookTitle ? `Kniha „${bookTitle}“ bola vrátená` : 'Kniha bola vrátená',
+            message: confirmationSent
+                ? 'Vrátenie sme zaznamenali a potvrdenie odoslali e-mailom.'
+                : 'Vrátenie sme zaznamenali, ale potvrdzujúci e-mail sa nepodarilo odoslať.',
+            type: confirmationSent ? 'success' : 'warning'
+        });
 
         if (document.getElementById('userBorrowsModal')?.style.display === 'flex') {
             await loadUserBorrows();
@@ -1483,7 +1772,13 @@ async function returnBook(borrowId) {
 
     } catch (err) {
         console.error('Chyba pri vrátení knihy:', err);
-        alert(`Knihu sa nepodarilo vrátiť: ${err.message || 'Neznáma chyba'}`);
+        showFeedbackModal({
+            title: 'Knihu sa nepodarilo vrátiť',
+            message: err.message || 'Skúste to, prosím, znova.',
+            type: 'error'
+        });
+    } finally {
+        returnSubmissionInProgress = false;
     }
 }
 
@@ -1600,22 +1895,23 @@ function showAuthMessage(message, type = 'info') {
 
 function updateAuthUi() {
     const authForm = document.getElementById('authForm');
-    const signedInPanel = document.getElementById('signedInPanel');
     const resetPasswordForm = document.getElementById('resetPasswordForm');
     const currentUserEmail = document.getElementById('currentUserEmail');
     const adminStatus = document.getElementById('adminStatus');
+    const signOutButton = document.getElementById('signOutButton');
     const adminControls = document.getElementById('adminControls');
 
     if (authForm) authForm.hidden = Boolean(currentUser) || passwordRecoveryPending;
-    if (signedInPanel) signedInPanel.hidden = !currentUser || passwordRecoveryPending;
     if (resetPasswordForm) resetPasswordForm.hidden = !passwordRecoveryPending;
     if (currentUserEmail) currentUserEmail.textContent = currentUser?.email || 'Neprihlásený';
 
     if (adminStatus) {
-        adminStatus.textContent = !currentUser ? 'Neprihlásený' : (isAdmin ? 'Administrátor' : 'Čitateľ');
+        adminStatus.textContent = !currentUser ? '' : (isAdmin ? 'Administrátor' : 'Čitateľ');
         adminStatus.style.color = isAdmin ? 'var(--success-text)' : 'var(--text-muted)';
+        adminStatus.hidden = !currentUser;
     }
 
+    if (signOutButton) signOutButton.hidden = !currentUser || passwordRecoveryPending;
     if (adminControls) adminControls.style.display = isAdmin ? 'block' : 'none';
 }
 
@@ -1666,7 +1962,7 @@ async function signIn(event) {
         if (error) throw error;
 
         document.getElementById('authPassword').value = '';
-        showAuthMessage('Ste prihlásený/-á.', 'success');
+        showAuthMessage('', 'info');
     } catch (error) {
         showAuthMessage(`Prihlásenie sa nepodarilo: ${error.message || 'Chyba spojenia.'}`, 'error');
     }
@@ -2270,6 +2566,37 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('searchModeFilter')?.addEventListener('change', filterAndRenderBooks);
     document.getElementById('categoryFilter')?.addEventListener('change', filterAndRenderBooks);
     document.getElementById('availabilityFilter')?.addEventListener('change', filterAndRenderBooks);
+    const feedbackModal = document.getElementById('feedbackModal');
+    feedbackModal?.addEventListener('click', event => {
+        if (event.target === feedbackModal) closeFeedbackModal();
+    });
+    document.addEventListener('keydown', event => {
+        if (!feedbackModal || feedbackModal.style.display !== 'flex') return;
+
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            closeFeedbackModal();
+            return;
+        }
+
+        if (event.key !== 'Tab') return;
+        const focusableButtons = Array.from(feedbackModal.querySelectorAll('button:not([hidden]):not(:disabled)'));
+        if (focusableButtons.length === 0) {
+            event.preventDefault();
+            document.getElementById('feedbackDialog')?.focus();
+            return;
+        }
+
+        const firstButton = focusableButtons[0];
+        const lastButton = focusableButtons[focusableButtons.length - 1];
+        if (event.shiftKey && document.activeElement === firstButton) {
+            event.preventDefault();
+            lastButton.focus();
+        } else if (!event.shiftKey && document.activeElement === lastButton) {
+            event.preventDefault();
+            firstButton.focus();
+        }
+    });
     document.getElementById('excelFileInput')?.addEventListener('change', () => {
         pendingBookImport = null;
         const previewDiv = document.getElementById('importPreview');
@@ -2289,6 +2616,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!button) return;
 
         switch (button.dataset.action) {
+            case 'close-feedback':
+                closeFeedbackModal();
+                break;
+            case 'confirm-feedback':
+                confirmFeedbackModal();
+                break;
             case 'open-user-borrows':
                 openUserBorrowsModal();
                 break;
@@ -2310,7 +2643,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 break;
             }
             case 'return-book':
-                returnBook(button.dataset.borrowId);
+                returnBook(button.dataset.borrowId, button.dataset.bookTitle);
                 break;
             case 'send-reminder': {
                 if (!isAdmin) {
