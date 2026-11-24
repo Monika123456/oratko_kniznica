@@ -34,6 +34,7 @@ let feedbackConfirmAction = null;
 let feedbackReturnFocus = null;
 let borrowSubmissionInProgress = false;
 let returnSubmissionInProgress = false;
+let manualReminderInProgress = false;
 
 // ==========================================
 // 1. NAČÍTANIE A ZOBRAZENIE KNÍH
@@ -286,8 +287,7 @@ function renderBooks(booksToRender) {
 // ==========================================
 function openBorrowModal(bookId, bookTitle) {
     if (!currentUser) {
-        openUserBorrowsModal();
-        showAuthMessage('Na požičanie knihy sa najprv prihláste alebo vytvorte účet.', 'error');
+        showNotice('Na požičanie knihy sa najprv prihláste alebo vytvorte účet.', 'error');
         return;
     }
 
@@ -316,7 +316,7 @@ function closeBorrowModal() {
     if (form) form.reset();
 }
 
-function showFeedbackModal({ title, message, type = 'info', busy = false, confirmLabel, onConfirm }) {
+function showFeedbackModal({ title, message, type = 'info', busy = false, confirmLabel, closeLabel = 'Zavrieť', onConfirm }) {
     const modal = document.getElementById('feedbackModal');
     const dialog = document.getElementById('feedbackDialog');
     const icon = document.getElementById('feedbackIcon');
@@ -350,6 +350,7 @@ function showFeedbackModal({ title, message, type = 'info', busy = false, confir
 
     confirmButton.textContent = confirmLabel || '';
     confirmButton.hidden = !confirmLabel || busy;
+    closeButton.textContent = closeLabel;
     closeButton.hidden = busy;
     modal.style.display = 'flex';
 
@@ -386,8 +387,8 @@ async function submitBorrowForm(event) {
     const nameInput = document.getElementById('borrowName')?.value.trim();
 
     if (!currentUser) {
-        showAuthMessage('Na požičanie knihy sa najprv prihláste.', 'error');
         closeBorrowModal();
+        showNotice('Na požičanie knihy sa najprv prihláste.', 'error');
         return;
     }
 
@@ -484,7 +485,12 @@ function openUserBorrowsModal() {
         modal.style.display = 'flex';
         loadUserBorrows();
     } else {
-        alert('Modálne okno pre výpožičky nebolo v HTML nájdené.');
+        console.error('Modálne okno pre výpožičky nebolo v HTML nájdené.');
+        showFeedbackModal({
+            title: 'Výpožičky nie sú dostupné',
+            message: 'Obnovte stránku a skúste to znova.',
+            type: 'error'
+        });
     }
 }
 
@@ -578,6 +584,7 @@ function returnBook(borrowId, bookTitle) {
         message: 'Potvrďte, že ste knihu odovzdali späť do knižnice.',
         type: 'confirm',
         confirmLabel: 'Potvrdiť vrátenie',
+        closeLabel: 'Zrušiť',
         onConfirm: () => processBookReturn(borrowId, bookTitle)
     });
 }
@@ -767,11 +774,19 @@ function buildReminderEmail(isFirstReminder, loan) {
 // ==========================================
 // 4. AUTENTIFIKÁCIA A ADMINISTRÁCIA
 // ==========================================
-function showAuthMessage(message, type = 'info') {
-    const messageElement = document.getElementById('authMessage');
-    if (!messageElement) return;
-    messageElement.textContent = message;
-    messageElement.dataset.type = type;
+function showNotice(message, type = 'info') {
+    if (!message) return;
+
+    const titles = {
+        error: 'Upozornenie',
+        success: 'Hotovo',
+        info: 'Informácia'
+    };
+    showFeedbackModal({
+        title: titles[type] || titles.info,
+        message,
+        type: titles[type] ? type : 'info'
+    });
 }
 
 function updateAuthUi() {
@@ -804,7 +819,7 @@ async function refreshAuthState(session) {
         const { data, error } = await supabaseClient.rpc('is_library_admin');
         if (error) {
             console.error('Nepodarilo sa overiť administrátorskú rolu:', error);
-            showAuthMessage('Prihlásenie prebehlo, ale rolu účtu sa nepodarilo overiť.', 'error');
+            showNotice('Prihlásenie prebehlo, ale rolu účtu sa nepodarilo overiť.', 'error');
         } else {
             isAdmin = data === true;
         }
@@ -830,11 +845,20 @@ async function refreshAuthState(session) {
 
 async function signIn(event) {
     event.preventDefault();
-    const email = document.getElementById('authEmail')?.value.trim().toLowerCase();
+    const emailInput = document.getElementById('authEmail');
+    const email = emailInput?.value.trim().toLowerCase();
     const password = document.getElementById('authPassword')?.value;
 
     if (!email || !password) {
-        showAuthMessage('Zadajte e-mail a heslo.', 'error');
+        showNotice('Zadajte e-mail a heslo.', 'error');
+        return;
+    }
+    if (!emailInput?.validity.valid) {
+        showNotice('Zadajte platnú e-mailovú adresu.', 'error');
+        return;
+    }
+    if (password.length < 8) {
+        showNotice('Heslo musí mať aspoň 8 znakov.', 'error');
         return;
     }
 
@@ -843,21 +867,26 @@ async function signIn(event) {
         if (error) throw error;
 
         document.getElementById('authPassword').value = '';
-        showAuthMessage('', 'info');
     } catch (error) {
-        showAuthMessage(`Prihlásenie sa nepodarilo: ${error.message || 'Chyba spojenia.'}`, 'error');
+        showNotice(`Prihlásenie sa nepodarilo: ${error.message || 'Chyba spojenia.'}`, 'error');
     }
 }
 
 async function signUp() {
-    const form = document.getElementById('authForm');
-    if (form && !form.reportValidity()) return;
-
-    const email = document.getElementById('authEmail')?.value.trim().toLowerCase();
+    const emailInput = document.getElementById('authEmail');
+    const email = emailInput?.value.trim().toLowerCase();
     const password = document.getElementById('authPassword')?.value;
 
     if (!email || !password) {
-        showAuthMessage('Na vytvorenie účtu zadajte e-mail a heslo.', 'error');
+        showNotice('Na vytvorenie účtu zadajte e-mail a heslo.', 'error');
+        return;
+    }
+    if (!emailInput?.validity.valid) {
+        showNotice('Zadajte platnú e-mailovú adresu.', 'error');
+        return;
+    }
+    if (password.length < 8) {
+        showNotice('Heslo musí mať aspoň 8 znakov.', 'error');
         return;
     }
 
@@ -872,22 +901,29 @@ async function signUp() {
 
         document.getElementById('authPassword').value = '';
         if (data.session) {
-            showAuthMessage('Účet bol vytvorený a prihlásenie prebehlo úspešne.', 'success');
+            showNotice('Účet bol vytvorený a prihlásenie prebehlo úspešne.', 'success');
         } else {
-            showAuthMessage('Účet bol vytvorený. Potvrďte ho cez odkaz, ktorý sme poslali e-mailom.', 'success');
+            showNotice('Účet bol vytvorený. Potvrďte ho cez odkaz, ktorý sme poslali e-mailom.', 'success');
         }
     } catch (error) {
-        showAuthMessage(`Účet sa nepodarilo vytvoriť: ${error.message || 'Chyba spojenia.'}`, 'error');
+        showNotice(`Účet sa nepodarilo vytvoriť: ${error.message || 'Chyba spojenia.'}`, 'error');
     }
 }
 
 async function requestPasswordReset() {
     const emailInput = document.getElementById('authEmail');
-    if (!emailInput?.reportValidity()) return;
+    if (!emailInput) {
+        showNotice('Formulár na obnovu hesla nie je dostupný. Obnovte stránku a skúste to znova.', 'error');
+        return;
+    }
 
     const email = emailInput.value.trim().toLowerCase();
     if (!email) {
-        showAuthMessage('Najprv zadajte e-mailovú adresu.', 'error');
+        showNotice('Najprv zadajte e-mailovú adresu.', 'error');
+        return;
+    }
+    if (!emailInput.validity.valid) {
+        showNotice('Zadajte platnú e-mailovú adresu.', 'error');
         return;
     }
 
@@ -897,9 +933,9 @@ async function requestPasswordReset() {
         });
 
         if (error) throw error;
-        showAuthMessage('Ak účet existuje, bol naň odoslaný odkaz na obnovu hesla.', 'success');
+        showNotice('Ak účet existuje, bol naň odoslaný odkaz na obnovu hesla.', 'success');
     } catch (error) {
-        showAuthMessage(`Odkaz na obnovu hesla sa nepodarilo odoslať: ${error.message || 'Chyba spojenia.'}`, 'error');
+        showNotice(`Odkaz na obnovu hesla sa nepodarilo odoslať: ${error.message || 'Chyba spojenia.'}`, 'error');
     }
 }
 
@@ -909,12 +945,12 @@ async function updatePassword(event) {
     const confirmation = document.getElementById('confirmNewPassword')?.value;
 
     if (!password || password.length < 8) {
-        showAuthMessage('Nové heslo musí mať aspoň 8 znakov.', 'error');
+        showNotice('Nové heslo musí mať aspoň 8 znakov.', 'error');
         return;
     }
 
     if (password !== confirmation) {
-        showAuthMessage('Heslá sa nezhodujú.', 'error');
+        showNotice('Heslá sa nezhodujú.', 'error');
         return;
     }
 
@@ -925,9 +961,9 @@ async function updatePassword(event) {
         passwordRecoveryPending = false;
         document.getElementById('resetPasswordForm')?.reset();
         updateAuthUi();
-        showAuthMessage('Heslo bolo zmenené.', 'success');
+        showNotice('Heslo bolo zmenené.', 'success');
     } catch (error) {
-        showAuthMessage(`Heslo sa nepodarilo zmeniť: ${error.message || 'Chyba spojenia.'}`, 'error');
+        showNotice(`Heslo sa nepodarilo zmeniť: ${error.message || 'Chyba spojenia.'}`, 'error');
     }
 }
 
@@ -935,9 +971,9 @@ async function signOut() {
     try {
         const { error } = await supabaseClient.auth.signOut();
         if (error) throw error;
-        showAuthMessage('Boli ste odhlásený/-á.', 'success');
+        showNotice('Boli ste odhlásený/-á.', 'success');
     } catch (error) {
-        showAuthMessage(`Odhlásenie sa nepodarilo: ${error.message || 'Chyba spojenia.'}`, 'error');
+        showNotice(`Odhlásenie sa nepodarilo: ${error.message || 'Chyba spojenia.'}`, 'error');
     }
 }
 
@@ -948,7 +984,7 @@ function initializeAuth() {
         window.setTimeout(() => {
             refreshAuthState(session).catch(error => {
                 console.error('Chyba pri obnove stavu prihlásenia:', error);
-                showAuthMessage('Nepodarilo sa načítať stav prihlásenia.', 'error');
+                showNotice('Nepodarilo sa načítať stav prihlásenia.', 'error');
             });
         }, 0);
     });
@@ -963,7 +999,7 @@ function toggleImportBox() {
 
 function openAdminBorrowsModal() {
     if (!isAdmin) {
-        showAuthMessage('Táto funkcia je dostupná iba administrátorovi.', 'error');
+        showNotice('Táto funkcia je dostupná iba administrátorovi.', 'error');
         return;
     }
 
@@ -1169,25 +1205,46 @@ function renderAdminBorrows() {
 // ==========================================
 // ODOSLANIE MANUÁLNEJ PRIPOMIENKY CEZ EMAILJS
 // ==========================================
-async function sendManualReminder(loan) {
+function sendManualReminder(loan) {
     if (!isAdmin) {
-        showAuthMessage('Pripomienky môže odosielať iba administrátor.', 'error');
+        showNotice('Pripomienky môže odosielať iba administrátor.', 'error');
         return;
     }
 
     if (!loan.email) {
-        alert('Čitateľ nemá zadaný e-mail!');
+        showFeedbackModal({
+            title: 'Pripomienku nemožno odoslať',
+            message: 'Čitateľ nemá zadanú e-mailovú adresu.',
+            type: 'error'
+        });
         return;
     }
 
     const isFirstReminder = !loan.posledna_pripomienka;
-    const reminder = buildReminderEmail(isFirstReminder, loan);
+    const reminderType = isFirstReminder ? 'prvú' : 'opakovanú';
+    showFeedbackModal({
+        title: `Poslať ${reminderType} pripomienku?`,
+        message: `Pripomienka bude odoslaná na adresu ${loan.email}.`,
+        type: 'confirm',
+        confirmLabel: 'Odoslať pripomienku',
+        closeLabel: 'Zrušiť',
+        onConfirm: () => processManualReminder(loan, isFirstReminder)
+    });
+}
 
-    if (!confirm(`Poslať ${isFirstReminder ? 'prvú' : 'ďalšiu'} pripomienku používateľovi ${loan.email}?`)) {
-        return;
-    }
+async function processManualReminder(loan, isFirstReminder) {
+    if (manualReminderInProgress) return;
+    manualReminderInProgress = true;
+    showFeedbackModal({
+        title: 'Odosielam pripomienku',
+        message: `Posielame e-mail na adresu ${loan.email}.`,
+        type: 'loading',
+        busy: true
+    });
 
+    let emailSent = false;
     try {
+        const reminder = buildReminderEmail(isFirstReminder, loan);
         const sent = await sendEmailJsTemplate(
             EMAILJS_REMINDER_TEMPLATE_ID,
             loan.email,
@@ -1195,10 +1252,21 @@ async function sendManualReminder(loan) {
             reminder.bodyHtml
         );
         if (!sent) {
-            alert('Pripomienku sa nepodarilo odoslať cez EmailJS.');
+            showFeedbackModal({
+                title: 'Pripomienku sa nepodarilo odoslať',
+                message: 'Skontrolujte pripojenie a nastavenia e-mailovej služby a skúste to znova.',
+                type: 'error'
+            });
             return;
         }
+        emailSent = true;
 
+        showFeedbackModal({
+            title: 'E-mail bol odoslaný',
+            message: 'Ukladáme dátum odoslania pripomienky.',
+            type: 'loading',
+            busy: true
+        });
         const { error: updateError } = await supabaseClient
             .from('vypozicky')
             .update({ posledna_pripomienka: new Date().toISOString().slice(0, 10) })
@@ -1208,13 +1276,22 @@ async function sendManualReminder(loan) {
             throw new Error(`E-mail bol odoslaný, ale dátum pripomienky sa nepodarilo uložiť: ${updateError.message}`);
         }
 
-        alert(`Pripomienka bola úspešne odoslaná na: ${loan.email}`);
-
+        showFeedbackModal({
+            title: 'Pripomienka bola odoslaná',
+            message: `E-mail bol odoslaný na adresu ${loan.email}.`,
+            type: 'success'
+        });
         await loadAdminBorrows();
 
     } catch (err) {
         console.error('Chyba pri odosielaní e-mailu:', err);
-        alert(err.message || 'Nepodarilo sa odoslať e-mail. Skontrolujte nastavenia EmailJS.');
+        showFeedbackModal({
+            title: emailSent ? 'E-mail bol odoslaný, ale nastala chyba' : 'Pripomienku sa nepodarilo odoslať',
+            message: err.message || 'Skontrolujte nastavenia e-mailovej služby a skúste to znova.',
+            type: emailSent ? 'warning' : 'error'
+        });
+    } finally {
+        manualReminderInProgress = false;
     }
 }
 
@@ -1223,7 +1300,7 @@ async function sendManualReminder(loan) {
 // ==========================================
 async function importBooksFromExcel() {
     if (!isAdmin) {
-        showAuthMessage('Import kníh môže spustiť iba administrátor.', 'error');
+        showNotice('Import kníh môže spustiť iba administrátor.', 'error');
         return;
     }
 
@@ -1373,11 +1450,11 @@ function renderBookImportPreview(books, issues) {
 
 async function confirmBookImport() {
     if (!isAdmin) {
-        showAuthMessage('Import kníh môže spustiť iba administrátor.', 'error');
+        showNotice('Import kníh môže spustiť iba administrátor.', 'error');
         return;
     }
     if (!pendingBookImport || pendingBookImport.length === 0) {
-        showAuthMessage('Najprv skontrolujte Excel súbor.', 'error');
+        showNotice('Najprv skontrolujte Excel súbor.', 'error');
         return;
     }
 
@@ -1528,12 +1605,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 break;
             case 'send-reminder': {
                 if (!isAdmin) {
-                    showAuthMessage('Táto funkcia je dostupná iba administrátorovi.', 'error');
+                    showNotice('Táto funkcia je dostupná iba administrátorovi.', 'error');
                     break;
                 }
                 const loan = currentActiveBorrows.find(item => String(item.id) === button.dataset.loanId);
                 if (!loan) {
-                    alert('Výpožička sa už nenašla. Obnovte prehľad a skúste to znova.');
+                    showFeedbackModal({
+                        title: 'Výpožička sa nenašla',
+                        message: 'Obnovte prehľad výpožičiek a skúste to znova.',
+                        type: 'error'
+                    });
                     break;
                 }
                 sendManualReminder(loan);
