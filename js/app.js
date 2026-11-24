@@ -757,15 +757,15 @@ function buildReminderEmail(isFirstReminder, loan) {
             : 'Opakovaná pripomienka k požičanej knihe',
         bodyHtml: `
             <div style="font-family: system-ui, sans-serif, Arial; font-size: 16px;">
-                <h2>Ahoj, ${meno} 👋</h2>
+                <h2>Ahoj, ${meno}</h2>
                 <p>${intro}</p>
                 <div style="background-color: #f0f7ff; border: 1px solid #bae0ff; border-left: 4px solid #1890ff; border-radius: 6px; padding: 12px 16px; margin: 15px 0;">
-                    <p style="margin: 0; font-size: 15px; line-height: 1.5;">📖 Knihu máš požičanú od <strong>${datumVypozicania}</strong>, t. j. <strong style="color: #092b00; font-size: 16px;">${pocetDni} dní</strong>.</p>
+                    <p style="margin: 0; font-size: 15px; line-height: 1.5;">📖 Knihu máš požičanú od <strong>${datumVypozicania}</strong>, t.j. <strong style="color: #092b00; font-size: 16px;">${pocetDni} dní</strong>.</p>
                 </div>
                 <p>${followUp}</p>
                 <p>Želáme Ti krásne a nerušené čítanie!</p>
                 <hr>
-                <p>S pozdravom,<br><strong>Tvoja Oratkovská Knižnica Saleziáni Bardejov</strong></p>
+                <p>S pozdravom,<br><strong>Tvoja Oratkovská Knižnica</strong></p>
             </div>
         `
     };
