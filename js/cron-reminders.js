@@ -69,10 +69,10 @@ function buildReminderEmail(loan, isFirstReminder, daysBorrowed) {
     const datumVypozicania = escapeHtml(formatEmailDate(loan.datum_vypozicania));
 
     const intro = isFirstReminder
-        ? `Veríme, že Ti kniha <strong>„${nazovKnihy}“</strong> od autora <strong>${autor}</strong> robí príjemnú spoločnosť a že si pri nej dobre oddýchneš.`
+        ? `Veríme, že Ti kniha <strong>„${nazovKnihy}“</strong> od autora <strong>${autor}</strong> robí príjemnú spoločnosť.`
         : `Evidujeme, že kniha <strong>„${nazovKnihy}“</strong> od autora <strong>${autor}</strong> je stále požičaná. Požičal(a) si si ju dňa <strong>${datumVypozicania}</strong>, teda už <strong>${daysBorrowed} dní</strong>.`;
     const followUp = isFirstReminder
-        ? 'Vôbec Ťa nenáhlime – pokojne si ju dočítaj vlastným tempom. Chceli sme Ti len dať vedieť, ako letí čas, a pripomenúť, že keď budeš mať príbeh dočítaný, v knižnici sa na ňu určite radi tešia aj ďalší čitatelia.'
+        ? 'Pokojne si ju dočítaj vlastným tempom. Chceli sme Ti len dať vedieť, ako letí čas, a pripomenúť, že keď budeš mať knihu dočítanú, v knižnici sa na ňu určite tešia aj ďalší čitatelia.'
         : 'Ak si knihu už vrátil(a), prosíme, daj nám vedieť, aby sme mohli opraviť evidenciu. Ak ju ešte máš, prosíme o jej vrátenie, keď to bude možné.';
 
     return {
@@ -81,15 +81,15 @@ function buildReminderEmail(loan, isFirstReminder, daysBorrowed) {
             : 'Opakovaná pripomienka k požičanej knihe',
         body_html: `
             <div style="font-family: system-ui, sans-serif, Arial; font-size: 16px;">
-                <h2>Ahoj, ${meno} 👋</h2>
+                <h2>Ahoj, ${meno}</h2>
                 <p>${intro}</p>
                 <div style="background-color: #f0f7ff; border: 1px solid #bae0ff; border-left: 4px solid #1890ff; border-radius: 6px; padding: 12px 16px; margin: 15px 0;">
-                    <p style="margin: 0; font-size: 15px; line-height: 1.5;">📖 Knihu máš požičanú od <strong>${datumVypozicania}</strong>, t. j. <strong style="color: #092b00; font-size: 16px;">${daysBorrowed} dní</strong>.</p>
+                    <p style="margin: 0; font-size: 15px; line-height: 1.5;">📖 Knihu máš požičanú od <strong>${datumVypozicania}</strong>, t.j. <strong style="color: #092b00; font-size: 16px;">${daysBorrowed} dní</strong>.</p>
                 </div>
                 <p>${followUp}</p>
                 <p>Želáme Ti krásne a nerušené čítanie!</p>
                 <hr>
-                <p>S pozdravom,<br><strong>Tvoja Oratkovská Knižnica Saleziáni Bardejov</strong></p>
+                <p>S pozdravom,<br><strong>Tvoja Oratkovská Knižnica</strong></p>
             </div>
         `
     };
