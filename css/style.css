@@ -15,6 +15,8 @@
     --success-text: #166534;
     --danger-bg: #fee2e2;
     --danger-text: #991b1b;
+    --warning-bg: #fef3c7;
+    --warning-text: #92400e;
     --box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     --input_select_box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
     --search_cat_box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
@@ -56,6 +58,8 @@
         --success-text: #a7f3d0;
         --danger-bg: #7f1d1d;
         --danger-text: #fecaca;
+        --warning-bg: #78350f;
+        --warning-text: #fde68a;
         --box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
         --input_select_box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.4);
         --search_cat_box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
@@ -108,23 +112,62 @@ h1 {
     margin-bottom: 5px;
 }
 
-/* Horná lišta a Admin bar */
-.user-bar,
-.admin-bar {
+/* Kompaktný panel účtu */
+.account-bar {
     background: var(--card-bg);
-    padding: 15px;
+    padding: 12px;
     border-radius: 12px;
     border: 1px solid var(--border);
     margin-bottom: 15px;
     box-shadow: var(--box-shadow);
 }
 
-.top-actions {
+.account-toolbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 12px;
+}
+
+.account-identity {
+    min-width: 0;
+}
+
+.account-email {
+    display: flex;
+    align-items: baseline;
     flex-wrap: wrap;
-    gap: 10px;
+    column-gap: 5px;
+    overflow-wrap: anywhere;
+}
+
+#currentUserEmail {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.account-role {
+    display: inline-block;
+    margin-top: 2px;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.account-role[hidden],
+#signOutButton[hidden] {
+    display: none;
+}
+
+.account-actions {
+    display: flex;
+    flex-shrink: 0;
+    gap: 8px;
+}
+
+.account-actions button {
+    padding: 8px 10px;
+    white-space: nowrap;
 }
 
 .admin-input-group {
@@ -139,16 +182,14 @@ h1 {
     min-width: 180px;
 }
 
-.auth-form,
-.signed-in-panel {
+.auth-form {
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
     margin-top: 10px;
 }
 
-.auth-form[hidden],
-.signed-in-panel[hidden] {
+.auth-form[hidden] {
     display: none;
 }
 
@@ -163,10 +204,13 @@ h1 {
 }
 
 .auth-message {
-    min-height: 1.25em;
     margin-top: 8px;
     color: var(--text-muted);
     font-size: 13px;
+}
+
+.auth-message:empty {
+    display: none;
 }
 
 .auth-message[data-type="error"] {
@@ -175,6 +219,22 @@ h1 {
 
 .auth-message[data-type="success"] {
     color: var(--success-text);
+}
+
+@media (max-width: 520px) {
+    .account-toolbar {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .account-actions {
+        width: 100%;
+    }
+
+    .account-actions button {
+        flex: 1;
+    }
 }
 
 /* Form prvky */
@@ -488,6 +548,98 @@ button:hover {
     max-height: 85vh;
     overflow-y: auto;
     box-shadow: var(--modal-content-box-shadow);
+}
+
+.feedback-modal-content {
+    max-width: 430px;
+    text-align: center;
+}
+
+.feedback-icon {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 14px;
+    border-radius: 50%;
+    font-size: 26px;
+    font-weight: 700;
+}
+
+.feedback-modal--success .feedback-icon {
+    background: var(--success-bg);
+    color: var(--success-text);
+}
+
+.feedback-modal--warning .feedback-icon {
+    background: var(--warning-bg);
+    color: var(--warning-text);
+}
+
+.feedback-modal--error .feedback-icon {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+}
+
+.feedback-modal--info .feedback-icon,
+.feedback-modal--confirm .feedback-icon {
+    background: var(--user-auth-section-background);
+    color: var(--primary);
+}
+
+.feedback-modal--loading .feedback-icon {
+    border: 4px solid var(--border);
+    border-top-color: var(--primary);
+    animation: feedback-spin 0.8s linear infinite;
+}
+
+.feedback-modal-content h2 {
+    color: var(--text-main);
+    font-size: 1.3rem;
+    margin-bottom: 8px;
+}
+
+.feedback-modal-content p {
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.feedback-actions {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.feedback-actions button {
+    min-width: 120px;
+}
+
+#feedbackCloseButton {
+    background: var(--btn-close-background);
+    color: var(--text);
+}
+
+#feedbackCloseButton:hover {
+    background: var(--btn-close-hover);
+}
+
+#feedbackConfirmButton[hidden],
+#feedbackCloseButton[hidden] {
+    display: none;
+}
+
+@keyframes feedback-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .feedback-modal--loading .feedback-icon {
+        animation: none;
+    }
 }
 
 .modal-header {
