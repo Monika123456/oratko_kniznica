@@ -1,11 +1,15 @@
 :root {
     --primary: #2563eb;
     --primary-hover: #1d4ed8;
+    --button-background: #2563eb;
+    --button-hover-background: #1d4ed8;
     --bg: #f8fafc;
     --text-main: #0f172a;
     --card-bg: #ffffff;
     --text: #1e293b;
     --text-muted: #64748b;
+    --input-bg: #ffffff;
+    --input-text: #0f172a;
     --border: #e2e8f0;
     --success-bg: #dcfce7;
     --success-text: #166534;
@@ -18,10 +22,10 @@
     --book-card-hover-box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     --modal-content-box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
     --modal-content-background: white;
-    --btn-return-hover-background: #047857;
-    --btn-return-background: #059669;
-    --btn-import-background: #059669;
-    --btn-return-color: #e2e8f0;
+    --btn-return-hover-background: #065f46;
+    --btn-return-background: #047857;
+    --btn-import-background: #047857;
+    --btn-return-color: #ffffff;
     --btn-close-hover: #e2e8f0;
     --btn-close-background: #f1f5f9;
     --modal-overlay-background: rgba(15, 23, 42, 0.6);
@@ -29,19 +33,24 @@
     --import-box-background: #eff6ff;
     --import-box-border: #93c5fd;
     --book-footer-border: #f1f5f9;
-    --btn-color: white;
+    --button-text: #ffffff;
 }
 
 /* Automatický tmavý režim pre zariadenia s zapnutým dark mode */
 @media (prefers-color-scheme: dark) {
     :root {
-        --primary: #3b82f6;
-        --primary-hover: #60a5fa;
+        color-scheme: dark;
+        --primary: #60a5fa;
+        --primary-hover: #93c5fd;
+        --button-background: #1d4ed8;
+        --button-hover-background: #1e40af;
         --bg: #0f172a;
         --card-bg: #1e293b;
         --text: #f8fafc;
         --text-main: #f8fafc;
         --text-muted: #94a3b8;
+        --input-bg: #0f172a;
+        --input-text: #f8fafc;
         --border: #334155;
         --success-bg: #064e3b;
         --success-text: #a7f3d0;
@@ -54,18 +63,17 @@
         --book-card-hover-box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
         --modal-content-box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
         --modal-content-background: #1e293b;
-        --btn-return-hover-background: #047857;
-        --btn-return-background: #059669;
-        --btn-import-background: #059669;
-        --btn-return-color: #0f172a;
-        --btn-close-hover: #94a3b8;
+        --btn-return-hover-background: #065f46;
+        --btn-return-background: #047857;
+        --btn-import-background: #047857;
+        --btn-return-color: #ffffff;
+        --btn-close-hover: #334155;
         --btn-close-background: #0f172a;
         --modal-overlay-background: rgba(0, 0, 0, 0.6);
         --user-auth-section-background: #0f172a;
         --import-box-background: #0f172a;
         --import-box-border: #93c5fd;
         --book-footer-border: #0f172a;
-        --btn-color: black;
     }
 }
 
@@ -131,6 +139,44 @@ h1 {
     min-width: 180px;
 }
 
+.auth-form,
+.signed-in-panel {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.auth-form[hidden],
+.signed-in-panel[hidden] {
+    display: none;
+}
+
+.auth-form input {
+    flex: 1;
+    min-width: 180px;
+}
+
+.btn-secondary {
+    background: var(--btn-close-background);
+    color: var(--text);
+}
+
+.auth-message {
+    min-height: 1.25em;
+    margin-top: 8px;
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+.auth-message[data-type="error"] {
+    color: var(--danger-text);
+}
+
+.auth-message[data-type="success"] {
+    color: var(--success-text);
+}
+
 /* Form prvky */
 input,
 select,
@@ -140,7 +186,17 @@ button {
     border-radius: 8px;
     font-size: 14px;
     outline: none;
-    background: var(--btn-color);
+    background: var(--input-bg);
+}
+
+input,
+select {
+    color: var(--input-text);
+}
+
+input::placeholder {
+    color: var(--text-muted);
+    opacity: 1;
 }
 
 input:focus,
@@ -150,8 +206,8 @@ select:focus {
 }
 
 button {
-    background: var(--primary);
-    color: var(--btn-color);
+    background: var(--button-background);
+    color: var(--button-text);
     border: none;
     font-weight: 600;
     cursor: pointer;
@@ -159,21 +215,57 @@ button {
 }
 
 button:hover {
-    background: var(--primary-hover);
+    background: var(--button-hover-background);
+}
+
+:focus-visible {
+    outline: 3px solid var(--primary);
+    outline-offset: 2px;
 }
 
 /* Filtre a Vyhľadávanie */
 .filter-bar {
     display: flex;
+    align-items: flex-start;
     gap: 10px;
     flex-wrap: wrap;
     margin-bottom: 20px;
+}
+
+.catalog-search-row {
+    display: flex;
+    flex: 2;
+    gap: 10px;
+    min-width: 260px;
 }
 
 .search-box {
     flex: 2;
     min-width: 200px;
     font-size: 15px;
+    box-shadow: var(--search_cat_box-shadow);
+}
+
+.catalog-filter-toggle {
+    display: none;
+    white-space: nowrap;
+    padding: 8px 12px;
+    border-radius: 6px;
+}
+
+.catalog-filters {
+    display: flex;
+    flex: 3;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.catalog-filters select {
+    flex: 1;
+    min-width: 130px;
+    font-size: 15px;
+    cursor: pointer;
     box-shadow: var(--search_cat_box-shadow);
 }
 
@@ -185,11 +277,107 @@ button:hover {
     box-shadow: var(--search_cat_box-shadow);
 }
 
+.catalog-clear-filters {
+    flex: none;
+    padding: 8px 10px;
+    color: var(--primary);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    white-space: nowrap;
+}
+
+.catalog-clear-filters:hover {
+    background: var(--card-bg);
+}
+
+@media (max-width: 760px) {
+    .filter-bar {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .catalog-search-row {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .catalog-search-row .search-box {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .catalog-filter-toggle {
+        display: block;
+    }
+
+    .catalog-filters {
+        display: none;
+        width: 100%;
+        padding: 10px;
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+    }
+
+    .catalog-filters.is-open {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .catalog-filters #searchModeFilter {
+        grid-column: 1 / -1;
+    }
+
+    .catalog-filters select {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .catalog-clear-filters {
+        grid-column: 1 / -1;
+    }
+}
+
 /* Karty kníh - GRID layout */
 .books-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     gap: 15px;
+}
+
+.book-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 24px 0 8px;
+}
+
+.book-pagination[hidden] {
+    display: none;
+}
+
+.book-pagination button {
+    min-width: 100px;
+    padding: 8px 14px;
+    border-radius: 6px;
+}
+
+.book-pagination button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.book-pagination button:disabled:hover {
+    background: var(--primary);
+}
+
+#bookPaginationStatus {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    text-align: center;
 }
 
 .book-card {
@@ -329,6 +517,12 @@ button:hover {
     background: var(--btn-close-hover);
 }
 
+.btn-close:focus-visible,
+.btn-secondary:focus-visible,
+.catalog-clear-filters:focus-visible {
+    outline-color: var(--primary);
+}
+
 .user-auth-section {
     margin-bottom: 20px;
     background: var(--user-auth-section-background);
@@ -367,6 +561,11 @@ th {
 
 .btn-return:hover {
     background: var(--btn-return-hover-background);
+}
+
+.btn-return:focus-visible,
+.btn-import:focus-visible {
+    outline-color: var(--primary);
 }
 
 .btn-import {
