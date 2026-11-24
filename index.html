@@ -5,20 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Oratkovská Knižnica Saleziáni Bardejov</title>
 
-  <!-- Načítanie Supabase z CDN (použité spoločné CDN) -->
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2.119.2"></script>
 
-  <!-- Načítanie knižnice pre prácu s Excel súbormi (SheetJS) -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
-  <!-- Načítanie EmailJS knižnice -->
-  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3.12.1/dist/email.min.js"></script>
 
-  <!-- Odkaz na externé CSS -->
   <link rel="stylesheet" href="css/style.css">
 
-  <!-- Odkaz na externý JavaScript (spustí sa po načítaní HTML) -->
-  <script src="js/app.js" defer></script>
+  <script type="module" src="js/app.js" defer></script>
 </head>
 <body>
 
@@ -31,55 +26,90 @@
   <div class="user-bar">
     <div class="top-actions">
       <div>
-        <strong>Prihlásený čitateľ:</strong>
+        <strong>Prihlásený účet:</strong>
         <span id="currentUserEmail" style="color: var(--primary); font-weight: 600;">Neprihlásený</span>
       </div>
       <div>
-        <button onclick="openUserBorrowsModal()">📖 Moje výpožičky</button>
+        <button type="button" data-action="open-user-borrows">📖 Moje výpožičky</button>
       </div>
     </div>
   </div>
 
-  <!-- Prihlasovací blok pre admina (so zadaním e-mailu aj hesla) -->
+  <!-- Prihlasovanie čitateľov aj administrátora cez Supabase Auth -->
   <div class="admin-bar">
     <div style="display: flex; justify-content: space-between; align-items: center;">
-      <strong>Správa pre Admina</strong>
-      <span id="adminStatus" style="font-size: 13px; font-weight: 600; color: var(--text-muted);">Status: Bežný používateľ</span>
+      <strong>Účet</strong>
+      <span id="adminStatus" style="font-size: 13px; font-weight: 600; color: var(--text-muted);">Neprihlásený</span>
     </div>
-    <div class="admin-input-group">
-      <input type="email" id="adminEmail" placeholder="E-mail admina">
-      <input type="password" id="adminPassword" placeholder="Heslo">
-      <button onclick="checkAdmin()">Prihlásiť ako Admin</button>
+    <form id="authForm" class="auth-form">
+      <input type="email" id="authEmail" autocomplete="email" required placeholder="Váš e-mail">
+      <input type="password" id="authPassword" autocomplete="current-password" required minlength="8" placeholder="Heslo (aspoň 8 znakov)">
+      <button type="submit">Prihlásiť sa</button>
+      <button type="button" data-action="sign-up">Vytvoriť účet</button>
+      <button type="button" class="btn-secondary" data-action="request-password-reset">Zabudnuté heslo</button>
+    </form>
+    <form id="resetPasswordForm" class="auth-form" hidden>
+      <input type="password" id="newPassword" autocomplete="new-password" required minlength="8" placeholder="Nové heslo">
+      <input type="password" id="confirmNewPassword" autocomplete="new-password" required minlength="8" placeholder="Zopakujte nové heslo">
+      <button type="submit">Nastaviť nové heslo</button>
+    </form>
+    <div id="signedInPanel" class="signed-in-panel" hidden>
+      <span>Ste prihlásený/-á. Vaša relácia zostane uložená v tomto prehliadači.</span>
+      <button type="button" data-action="sign-out">Odhlásiť sa</button>
     </div>
+    <p id="authMessage" class="auth-message" aria-live="polite"></p>
   </div>
 
   <!-- Tlačidlá pre Admina -->
   <div id="adminControls" class="admin-only">
     <div style="margin-bottom: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
-      <button class="btn-import" onclick="toggleImportBox()">📥 Importovať Excel</button>
-      <button type="button" onclick="openAdminBorrowsModal()">📋 Prehľad výpožičiek (Admin)</button>
+      <button type="button" class="btn-import" data-action="toggle-import">📥 Importovať Excel</button>
+      <button type="button" data-action="open-admin-borrows">📋 Prehľad výpožičiek (Admin)</button>
     </div>
 
     <div id="importBox" class="import-box" style="display: none;">
       <h3 style="margin-bottom: 8px;">Import kníh z Excelu (.xlsx, .xls)</h3>
       <input type="file" id="excelFileInput" accept=".xlsx, .xls" style="margin-bottom: 10px; width: 100%;">
-      <button class="btn-import" onclick="importBooksFromExcel()" style="width: 100%;">Spustiť import</button>
-      <div id="importProgress" style="margin-top: 10px; font-size: 13px; font-weight: bold; color: var(--primary);"></div>
+      <button type="button" class="btn-import" data-action="import-books" style="width: 100%;">Skontrolovať súbor</button>
+      <div id="importProgress" role="status" aria-live="polite" style="margin-top: 10px; font-size: 13px; font-weight: bold; color: var(--primary);"></div>
+      <div id="importPreview" aria-live="polite" style="display: none; max-height: 320px; overflow: auto; margin-top: 10px;"></div>
+      <button type="button" id="confirmBookImportButton" class="btn-import" data-action="confirm-book-import" style="display: none; width: 100%; margin-top: 10px;">Potvrdiť a importovať nové knihy</button>
     </div>
   </div>
 
-  <!-- Vyhľadávanie a Filter Kategórií -->
+  <!-- Vyhľadávanie a filtre katalógu -->
   <div class="filter-bar">
-    <input type="text" id="searchInput" class="search-box" onkeyup="filterBooks()" placeholder="🔍 Vyhľadať knihu alebo autora...">
-    <select id="categoryFilter" class="category-select" onchange="filterBooks()">
-      <option value="">Všetky kategórie</option>
-    </select>
+    <div class="catalog-search-row">
+      <input type="text" id="searchInput" class="search-box" placeholder="🔍 Názov knihy alebo autor..." aria-label="Vyhľadať knihu alebo autora">
+      <button type="button" id="catalogFilterToggle" class="catalog-filter-toggle" data-action="toggle-catalog-filters" aria-expanded="false" aria-controls="catalogFilters">Filtre</button>
+    </div>
+    <div id="catalogFilters" class="catalog-filters">
+      <select id="searchModeFilter" aria-label="Spôsob vyhľadávania">
+        <option value="all">Názov/autor obsahuje</option>
+        <option value="title-prefix">Názov začína na</option>
+        <option value="author-prefix">Autor začína na</option>
+      </select>
+      <select id="categoryFilter" class="category-select" aria-label="Filtrovať podľa kategórie">
+        <option value="">Všetky kategórie</option>
+      </select>
+      <select id="availabilityFilter" aria-label="Filtrovať podľa dostupnosti">
+        <option value="all">Všetky knihy</option>
+        <option value="available">Iba dostupné</option>
+        <option value="unavailable">Iba nedostupné</option>
+      </select>
+      <button type="button" class="catalog-clear-filters" data-action="clear-catalog-filters">Vymazať filtre</button>
+    </div>
   </div>
 
   <!-- Zoznam kníh v kartách -->
   <div id="booksGrid" class="books-grid">
     <p style="text-align: center; grid-column: 1/-1; color: var(--text-muted);">Načítavam knihy...</p>
   </div>
+  <nav id="bookPagination" class="book-pagination" aria-label="Stránkovanie katalógu" hidden>
+    <button type="button" data-action="previous-books-page" aria-label="Predošlá strana">Predošlá</button>
+    <span id="bookPaginationStatus" aria-live="polite"></span>
+    <button type="button" data-action="next-books-page" aria-label="Ďalšia strana">Ďalšia</button>
+  </nav>
 </div>
 
 <!-- MODAL 1: Požičanie knihy -->
@@ -87,18 +117,14 @@
   <div class="modal-content" style="max-width: 450px;">
     <div class="modal-header">
       <h2>Požičať knihu</h2>
-      <button class="btn-close" onclick="closeBorrowModal()">✕</button>
+      <button type="button" class="btn-close" data-action="close-borrow">✕</button>
     </div>
     <div id="borrowModalBookTitle" style="font-weight: 700; margin-bottom: 15px; color: var(--primary);"></div>
-    <form id="borrowForm" onsubmit="submitBorrowForm(event)">
+    <form id="borrowForm">
       <input type="hidden" id="borrowBookId">
       <div class="form-group">
         <label for="borrowName">Vaše meno a priezvisko:</label>
         <input type="text" id="borrowName" required placeholder="Napr. Ján Novák">
-      </div>
-      <div class="form-group">
-        <label for="borrowEmail">Váš e-mail:</label>
-        <input type="email" id="borrowEmail" required placeholder="jan.novak@example.com">
       </div>
       <button type="submit" style="width: 100%; padding: 12px; font-size: 15px;">Potvrdiť výpožičku</button>
     </form>
@@ -110,17 +136,13 @@
   <div class="modal-content">
     <div class="modal-header">
       <h2>📖 Moje výpožičky</h2>
-      <button class="btn-close" onclick="closeUserBorrowsModal()">✕</button>
+      <button type="button" class="btn-close" data-action="close-user-borrows">✕</button>
     </div>
     <div id="userAuthSection" class="user-auth-section">
-      <label for="userModalEmail">Zadajte e-mail pre načítanie vašich kníh:</label>
-      <div style="display: flex; gap: 8px;">
-        <input type="email" id="userModalEmail" placeholder="jan.novak@example.com" style="flex: 1;">
-        <button onclick="loadUserBorrows()">Načítať</button>
-      </div>
+      <p>Po prihlásení sa tu zobrazia iba vaše aktívne výpožičky.</p>
     </div>
     <div id="userBorrowsList">
-      <p style="text-align: center; color: var(--text-muted);">Zadajte váš e-mail vyššie.</p>
+      <p style="text-align: center; color: var(--text-muted);">Na načítanie výpožičiek sa prihláste.</p>
     </div>
   </div>
 </div>
@@ -130,12 +152,12 @@
   <div class="modal-content">
     <div class="modal-header">
       <h2>📋 Prehľad výpožičiek (Admin)</h2>
-      <button class="btn-close" onclick="closeAdminBorrowsModal()">✕</button>
+      <button type="button" class="btn-close" data-action="close-admin-borrows">✕</button>
     </div>
 
     <!-- Filtre pre Admina -->
     <div class="admin-filter-bar">
-        <select id="adminFilterSelect" onchange="renderAdminBorrows()">
+        <select id="adminFilterSelect">
             <optgroup label="Pohľad: Zoznam výpožičiek">
             <option value="list-date-desc" selected>Najnovšie výpožičky</option>
             <option value="list-date-asc">Najstaršie výpožičky</option>
